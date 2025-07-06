@@ -68,14 +68,15 @@ const handleOPTIONS = async () => {
   });
 };
 
-const BASE_URL = "https://generativelanguage.googleapis.com";
-const API_VERSION = "v1beta";
+// Use gemini-balance API pool instead of direct Google API
+const BASE_URL = "http://10.20200108.xyz:8000";
+const API_VERSION = "v1";
 
-// https://github.com/google-gemini/generative-ai-js/blob/cf223ff4a1ee5a2d944c53cddb8976136382bee6/src/requests/request.ts#L71
-const API_CLIENT = "genai-js/0.21.0"; // npm view @google/generative-ai version
+// Use hardcoded API key for gemini-balance
+const API_POOL_KEY = "F435261ox";
 const makeHeaders = (apiKey, more) => ({
-  "x-goog-api-client": API_CLIENT,
-  ...(apiKey && { "x-goog-api-key": apiKey }),
+  "Authorization": `Bearer ${API_POOL_KEY}`,
+  "Content-Type": "application/json",
   ...more
 });
 
@@ -114,15 +115,13 @@ async function handleEmbeddings (req, apiKey) {
     req.model = DEFAULT_EMBEDDINGS_MODEL;
     model = "models/" + req.model;
   }
-  const response = await fetch(`${BASE_URL}/${API_VERSION}/${model}:batchEmbedContents`, {
+  const response = await fetch(`${BASE_URL}/${API_VERSION}/embeddings`, {
     method: "POST",
-    headers: makeHeaders(apiKey, { "Content-Type": "application/json" }),
+    headers: makeHeaders(apiKey),
     body: JSON.stringify({
-      "requests": req.input.map(text => ({
-        model,
-        content: { parts: { text } },
-        outputDimensionality: req.dimensions,
-      }))
+      model: req.model,
+      input: req.input,
+      dimensions: req.dimensions
     })
   });
   let { body } = response;
@@ -154,13 +153,18 @@ async function handleCompletions (req, apiKey) {
     case req.model.startsWith("learnlm-"):
       model = req.model;
   }
-  const TASK = req.stream ? "streamGenerateContent" : "generateContent";
-  let url = `${BASE_URL}/${API_VERSION}/models/${model}:${TASK}`;
-  if (req.stream) { url += "?alt=sse"; }
-  const response = await fetch(url, {
+  // Use OpenAI-compatible chat completions endpoint for gemini-balance
+  const response = await fetch(`${BASE_URL}/${API_VERSION}/chat/completions`, {
     method: "POST",
-    headers: makeHeaders(apiKey, { "Content-Type": "application/json" }),
-    body: JSON.stringify(await transformRequest(req)), // try
+    headers: makeHeaders(apiKey),
+    body: JSON.stringify({
+      model: model,
+      messages: req.messages,
+      stream: req.stream || false,
+      temperature: req.temperature,
+      max_tokens: req.max_tokens,
+      top_p: req.top_p
+    })
   });
 
   let body = response.body;

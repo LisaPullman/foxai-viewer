@@ -20,6 +20,7 @@ export class MultimodalLiveClient extends EventEmitter {
      */
     constructor() {
         super();
+        // Use API Pool WebSocket endpoint
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         this.baseUrl  = `${wsProtocol}//${window.location.host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
         this.ws = null;

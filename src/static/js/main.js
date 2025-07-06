@@ -30,6 +30,24 @@ const screenIcon = document.getElementById('screen-icon');
 const screenContainer = document.getElementById('screen-container');
 const screenPreview = document.getElementById('screen-preview');
 const inputAudioVisualizer = document.getElementById('input-audio-visualizer');
+// API Pool configuration - hardcoded (根据您的截图确认)
+const API_POOL_CONFIG = {
+    apiKey: 'F435261ox',
+    baseUrl: 'http://10.20200108.xyz:8000',  // 恢复完整URL
+    endpoint: '/v1/chat/completions'
+};
+
+// Fallback configuration for testing (using local proxy)
+const FALLBACK_CONFIG = {
+    apiKey: 'test-key',
+    baseUrl: window.location.origin,
+    endpoint: '/v1/chat/completions'
+};
+
+// DOM Elements
+const connectionModeSelect = document.getElementById('connection-mode-select');
+const apiPoolInfo = document.getElementById('api-pool-info');
+const websocketSettings = document.getElementById('websocket-settings');
 const apiKeyInput = document.getElementById('api-key');
 const voiceSelect = document.getElementById('voice-select');
 const languageSelect = document.getElementById('language-select');
@@ -44,6 +62,7 @@ const responseTypeSelect = document.getElementById('response-type-select');
 const mcpToolsButton = document.getElementById('mcp-tools-btn');
 
 // Load saved values from localStorage
+const savedConnectionMode = localStorage.getItem('connection_mode') || 'api-pool';
 const savedApiKey = localStorage.getItem('gemini_api_key');
 const savedVoice = localStorage.getItem('gemini_voice');
 const savedLanguage = localStorage.getItem('gemini_language');
@@ -51,10 +70,42 @@ const savedUILanguage = localStorage.getItem('gemini_ui_language');
 const savedFPS = localStorage.getItem('video_fps');
 const savedSystemInstruction = localStorage.getItem('system_instruction');
 
-
-if (savedApiKey) {
+// Initialize connection mode
+connectionModeSelect.value = savedConnectionMode;
+if (savedApiKey && apiKeyInput) {
     apiKeyInput.value = savedApiKey;
 }
+
+// Handle connection mode change
+connectionModeSelect.addEventListener('change', () => {
+    const mode = connectionModeSelect.value;
+    localStorage.setItem('connection_mode', mode);
+
+    if (mode === 'api-pool') {
+        apiPoolInfo.style.display = 'flex';
+        websocketSettings.style.display = 'none';
+        // Disable multimodal features for API pool mode
+        micButton.style.opacity = '0.5';
+        cameraButton.style.opacity = '0.5';
+        screenButton.style.opacity = '0.5';
+        micButton.title = 'Not available in API Pool mode';
+        cameraButton.title = 'Not available in API Pool mode';
+        screenButton.title = 'Not available in API Pool mode';
+    } else {
+        apiPoolInfo.style.display = 'none';
+        websocketSettings.style.display = 'flex';
+        // Enable multimodal features for WebSocket mode
+        micButton.style.opacity = '1';
+        cameraButton.style.opacity = '1';
+        screenButton.style.opacity = '1';
+        micButton.title = 'Microphone';
+        cameraButton.title = 'Camera';
+        screenButton.title = 'Screen Share';
+    }
+});
+
+// Trigger initial mode setup
+connectionModeSelect.dispatchEvent(new Event('change'));
 if (savedVoice) {
     voiceSelect.value = savedVoice;
 }
@@ -272,14 +323,103 @@ async function resumeAudioContext() {
 }
 
 /**
- * Connects to the WebSocket server.
+ * Connects to the service based on selected mode.
  * @returns {Promise<void>}
  */
 async function connectToWebsocket() {
+    const connectionMode = connectionModeSelect.value;
+
+    if (connectionMode === 'api-pool') {
+        return connectToApiPool();
+    } else {
+        return connectToWebSocketMode();
+    }
+}
+
+/**
+ * Connects to API Pool using HTTP requests.
+ * @returns {Promise<void>}
+ */
+async function connectToApiPool() {
+    logMessage('Connecting to API Pool...', 'system', 'connecting');
+
+    // Save values to localStorage
+    localStorage.setItem('gemini_voice', voiceSelect.value);
+    localStorage.setItem('gemini_language', languageSelect.value);
+    localStorage.setItem('system_instruction', systemInstructionInput.value);
+
+    try {
+        // Test API Pool connection with timeout
+        logMessage(`Testing connection to ${API_POOL_CONFIG.baseUrl}...`, 'system');
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        const response = await fetch(`${API_POOL_CONFIG.baseUrl}/v1/models`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${API_POOL_CONFIG.apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+            const data = await response.json();
+            logMessage(`Found ${data.data?.length || 0} models available`, 'system');
+
+            isConnected = true;
+            connectButton.textContent = i18n.t('disconnect');
+            connectButton.classList.add('connected');
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            // Disable multimodal features in API Pool mode
+            micButton.disabled = true;
+            cameraButton.disabled = true;
+            screenButton.disabled = true;
+            logMessage('✅ Connected to API Pool Successfully', 'system', 'connected');
+        } else {
+            const errorText = await response.text();
+            throw new Error(`API Pool connection failed: ${response.status} - ${errorText}`);
+        }
+    } catch (error) {
+        let errorMessage = 'Unknown error';
+
+        if (error.name === 'AbortError') {
+            errorMessage = 'Connection timeout - API Pool may be unreachable from this network';
+        } else if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+            errorMessage = 'Network error - API Pool may be on internal network or blocked by firewall';
+        } else {
+            errorMessage = error.message;
+        }
+
+        Logger.error('API Pool connection error:', error);
+        logMessage(`❌ Connection Error: ${errorMessage}`, 'system');
+        logMessage(`API Pool URL: ${API_POOL_CONFIG.baseUrl}`, 'system');
+        logMessage(`API Key: ${API_POOL_CONFIG.apiKey.substring(0, 8)}...`, 'system');
+        logMessage(`💡 Tip: If API Pool is on internal network, try WebSocket mode instead`, 'system');
+
+        isConnected = false;
+        connectButton.textContent = i18n.t('connect');
+        connectButton.classList.remove('connected');
+        messageInput.disabled = true;
+        sendButton.disabled = true;
+    }
+}
+
+/**
+ * Connects to WebSocket server for full multimodal features.
+ * @returns {Promise<void>}
+ */
+async function connectToWebSocketMode() {
     if (!apiKeyInput.value) {
         logMessage('Please input API Key', 'system', 'apiKeyRequired');
         return;
     }
+
+    logMessage('Connecting to WebSocket...', 'system', 'connecting');
 
     // Save values to localStorage
     localStorage.setItem('gemini_api_key', apiKeyInput.value);
@@ -309,7 +449,7 @@ async function connectToWebsocket() {
     };  
 
     try {
-        await client.connect(config,apiKeyInput.value);
+        await client.connect(config, apiKeyInput.value);
         isConnected = true;
         await resumeAudioContext();
         connectButton.textContent = i18n.t('disconnect');
@@ -319,7 +459,7 @@ async function connectToWebsocket() {
         micButton.disabled = false;
         cameraButton.disabled = false;
         screenButton.disabled = false;
-        logMessage('Connected to Gemini Multimodal Live API', 'system', 'connected');
+        logMessage('Connected to WebSocket Successfully', 'system', 'connected');
     } catch (error) {
         const errorMessage = error.message || 'Unknown error';
         Logger.error('Connection error:', error);
@@ -371,13 +511,89 @@ function disconnectFromWebsocket() {
 /**
  * Handles sending a text message.
  */
-function handleSendMessage() {
+async function handleSendMessage() {
     const message = messageInput.value.trim();
-    if (message) {
-        logMessage(message, 'user');
-        client.send({ text: message });
-        messageInput.value = '';
+    if (!message) return;
+
+    const connectionMode = connectionModeSelect.value;
+
+    if (connectionMode === 'api-pool') {
+        await sendMessageToApiPool(message);
+    } else {
+        sendMessageToWebSocket(message);
     }
+
+    messageInput.value = '';
+}
+
+/**
+ * Sends message to API Pool using HTTP request.
+ */
+async function sendMessageToApiPool(message) {
+    logMessage(message, 'user');
+    logMessage('🔄 Sending to API Pool...', 'system');
+
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+        const response = await fetch(`${API_POOL_CONFIG.baseUrl}${API_POOL_CONFIG.endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${API_POOL_CONFIG.apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'gemini-2.0-flash-exp',
+                messages: [
+                    {
+                        role: 'system',
+                        content: systemInstructionInput.value || 'You are a helpful assistant.'
+                    },
+                    {
+                        role: 'user',
+                        content: message
+                    }
+                ],
+                stream: false,
+                max_tokens: 2000,
+                temperature: 0.7
+            }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+            const data = await response.json();
+            const aiResponse = data.choices?.[0]?.message?.content || 'No response received';
+            logMessage(aiResponse, 'ai');
+        } else {
+            const errorText = await response.text();
+            throw new Error(`API request failed: ${response.status} - ${errorText}`);
+        }
+    } catch (error) {
+        let errorMessage = 'Unknown error';
+
+        if (error.name === 'AbortError') {
+            errorMessage = 'Request timeout - API Pool may be slow or unreachable';
+        } else if (error.message.includes('fetch')) {
+            errorMessage = 'Network error - Check connection to API Pool';
+        } else {
+            errorMessage = error.message;
+        }
+
+        Logger.error('API Pool message error:', error);
+        logMessage(`❌ Error: ${errorMessage}`, 'system');
+    }
+}
+
+/**
+ * Sends message to WebSocket.
+ */
+function sendMessageToWebSocket(message) {
+    logMessage(message, 'user');
+    client.send({ text: message });
 }
 
 // Event Listeners

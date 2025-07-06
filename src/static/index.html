@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Multimodal Live API Client</title>
+    <title>FoxAI Multimodal Live API Client</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -21,13 +21,36 @@
                 <div class="foxai-icon">🦊</div>
                 <div class="foxai-text">
                     <span class="foxai-brand">FoxAI</span>
-                    <span class="foxai-subtitle">Powered by Gemini</span>
                 </div>
             </div>
         </div>
 
         <div class="settings">
-            <input type="password" id="api-key" placeholder="Please Input Gemini API Key" />
+            <div class="connection-mode">
+                <label for="connection-mode-select">Connection Mode:</label>
+                <select id="connection-mode-select">
+                    <option value="api-pool">🔗 API Pool (Text Only)</option>
+                    <option value="websocket">🎤 WebSocket (Full Features)</option>
+                </select>
+            </div>
+            <div id="api-pool-info" class="api-pool-info">
+                <span class="api-pool-status">🔗 API Pool Ready</span>
+                <span class="api-pool-endpoint">http://10.20200108.xyz:8000</span>
+                <span class="api-pool-key">Key: F435261ox</span>
+                <div class="api-pool-features">
+                    <span class="feature-tag">✅ Text Chat</span>
+                    <span class="feature-tag disabled">❌ Voice</span>
+                    <span class="feature-tag disabled">❌ Video</span>
+                </div>
+            </div>
+            <div id="websocket-settings" class="websocket-settings" style="display: none;">
+                <input type="password" id="api-key" placeholder="Please Input Gemini API Key" />
+                <div class="websocket-features">
+                    <span class="feature-tag">✅ Text Chat</span>
+                    <span class="feature-tag">✅ Voice</span>
+                    <span class="feature-tag">✅ Video</span>
+                </div>
+            </div>
             <div class="settings-buttons">
                 <button id="config-toggle" class="material-symbols-outlined" title="Settings">settings</button>
                 <button id="mcp-tools-btn" class="material-symbols-outlined" title="MCP Tools Manager">extension</button>

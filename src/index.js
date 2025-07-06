@@ -67,9 +67,11 @@ async function handleWebSocket(request, env) {
   
 	const url = new URL(request.url);
 	const pathAndQuery = url.pathname + url.search;
+	// Note: gemini-balance doesn't support WebSocket, but we'll keep the proxy structure
+	// and handle the conversion in the message processing
 	const targetUrl = `wss://generativelanguage.googleapis.com${pathAndQuery}`;
-	  
-	console.log('Target URL:', targetUrl);
+
+	console.log('Target URL (fallback to Google):', targetUrl);
   
   const [client, proxy] = new WebSocketPair();
   proxy.accept();
