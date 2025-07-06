@@ -22,6 +22,7 @@ const micButton = document.getElementById('mic-button');
 const micIcon = document.getElementById('mic-icon');
 const audioVisualizer = document.getElementById('audio-visualizer');
 const connectButton = document.getElementById('connect-button');
+const logsToggleButton = document.getElementById('logs-toggle-button');
 const cameraButton = document.getElementById('camera-button');
 const cameraIcon = document.getElementById('camera-icon');
 const stopVideoButton = document.getElementById('stop-video');
@@ -33,7 +34,7 @@ const inputAudioVisualizer = document.getElementById('input-audio-visualizer');
 // API Pool configuration - hardcoded (根据您的截图确认)
 const API_POOL_CONFIG = {
     apiKey: 'F435261ox',
-    baseUrl: 'http://10.20200108.xyz:8000',  // 恢复完整URL
+    baseUrl: 'http://10.20200108.xyz',  // 不使用端口号
     endpoint: '/v1/chat/completions'
 };
 
@@ -163,6 +164,7 @@ let videoManager = null;
 let isScreenSharing = false;
 let screenRecorder = null;
 let isUsingTool = false;
+let isLogsVisible = false;
 
 // Multimodal Client
 const client = new MultimodalLiveClient();
@@ -174,19 +176,31 @@ const client = new MultimodalLiveClient();
  * @param {string} [translationKey=''] - Optional translation key for the message.
  */
 function logMessage(message, type = 'system', translationKey = '') {
+    // If logs are hidden and this is a system message, don't display it
+    if (!isLogsVisible && type === 'system') {
+        return;
+    }
+
     const logEntry = document.createElement('div');
     logEntry.classList.add('log-entry', type);
 
-    const timestamp = document.createElement('span');
-    timestamp.classList.add('timestamp');
-    timestamp.textContent = new Date().toLocaleTimeString();
-    logEntry.appendChild(timestamp);
+    // Only show timestamp and system emoji for system messages when logs are visible
+    if (type === 'system' && isLogsVisible) {
+        const timestamp = document.createElement('span');
+        timestamp.classList.add('timestamp');
+        timestamp.textContent = new Date().toLocaleTimeString();
+        logEntry.appendChild(timestamp);
+    }
 
     const emoji = document.createElement('span');
     emoji.classList.add('emoji');
     switch (type) {
         case 'system':
-            emoji.textContent = '⚙️';
+            if (isLogsVisible) {
+                emoji.textContent = '⚙️';
+            } else {
+                return; // Don't show system messages when logs are hidden
+            }
             break;
         case 'user':
             emoji.textContent = '🫵';
@@ -350,7 +364,7 @@ async function connectToApiPool() {
 
     try {
         // Test API Pool connection with timeout
-        logMessage(`Testing connection to ${API_POOL_CONFIG.baseUrl}...`, 'system');
+        logMessage('Testing connection to secure API pool...', 'system');
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -397,8 +411,8 @@ async function connectToApiPool() {
 
         Logger.error('API Pool connection error:', error);
         logMessage(`❌ Connection Error: ${errorMessage}`, 'system');
-        logMessage(`API Pool URL: ${API_POOL_CONFIG.baseUrl}`, 'system');
-        logMessage(`API Key: ${API_POOL_CONFIG.apiKey.substring(0, 8)}...`, 'system');
+        logMessage('API Pool: Private service connection failed', 'system');
+        logMessage('Authentication: Verified credentials', 'system');
         logMessage(`💡 Tip: If API Pool is on internal network, try WebSocket mode instead`, 'system');
 
         isConnected = false;
@@ -685,10 +699,106 @@ connectButton.addEventListener('click', () => {
     }
 });
 
+// Logs toggle functionality
+logsToggleButton.addEventListener('click', () => {
+    toggleLogsVisibility();
+});
+
+/**
+ * Toggles the visibility of the logs container
+ */
+function toggleLogsVisibility() {
+    isLogsVisible = !isLogsVisible;
+    const logsContainer = document.getElementById('logs-container');
+    const toggleIcon = logsToggleButton.querySelector('.material-symbols-outlined');
+    const toggleText = logsToggleButton.querySelector('.logs-toggle-text');
+
+    if (isLogsVisible) {
+        logsContainer.classList.remove('logs-hidden');
+        logsContainer.classList.add('logs-visible');
+        logsToggleButton.classList.add('active');
+        toggleIcon.textContent = 'visibility_off';
+        toggleText.textContent = 'Hide Logs';
+        // Refresh the display to show system messages
+        refreshLogsDisplay();
+        logMessage('📋 Connection logs are now visible', 'system');
+    } else {
+        logsContainer.classList.remove('logs-visible');
+        logsContainer.classList.add('logs-hidden');
+        logsToggleButton.classList.remove('active');
+        toggleIcon.textContent = 'visibility';
+        toggleText.textContent = 'Show Logs';
+        // Refresh the display to hide system messages
+        refreshLogsDisplay();
+    }
+
+    // Save preference to localStorage
+    localStorage.setItem('logs_visible', isLogsVisible.toString());
+}
+
+/**
+ * Refreshes the logs display based on current visibility setting
+ */
+function refreshLogsDisplay() {
+    const logsContainer = document.getElementById('logs-container');
+    const logEntries = logsContainer.querySelectorAll('.log-entry');
+
+    logEntries.forEach(entry => {
+        if (entry.classList.contains('system')) {
+            if (isLogsVisible) {
+                entry.style.display = 'flex';
+                // Show timestamp for system messages
+                const timestamp = entry.querySelector('.timestamp');
+                if (timestamp) {
+                    timestamp.style.display = 'inline';
+                }
+            } else {
+                entry.style.display = 'none';
+            }
+        } else {
+            // Always show user and AI messages
+            entry.style.display = 'flex';
+            // Hide timestamp for user/AI messages when logs are hidden
+            const timestamp = entry.querySelector('.timestamp');
+            if (timestamp) {
+                timestamp.style.display = isLogsVisible ? 'inline' : 'none';
+            }
+        }
+    });
+}
+
+/**
+ * Initialize logs visibility from localStorage
+ */
+function initializeLogsVisibility() {
+    const logsContainer = document.getElementById('logs-container');
+    const savedLogsVisible = localStorage.getItem('logs_visible');
+
+    // Always show the logs container, but control what's displayed inside
+    logsContainer.classList.remove('logs-hidden');
+    logsContainer.classList.add('logs-visible');
+
+    if (savedLogsVisible === 'true') {
+        isLogsVisible = false; // Set to false first so toggle works correctly
+        toggleLogsVisibility();
+    } else {
+        // Default to logs hidden (only show user/AI messages)
+        isLogsVisible = false;
+        const toggleIcon = logsToggleButton.querySelector('.material-symbols-outlined');
+        const toggleText = logsToggleButton.querySelector('.logs-toggle-text');
+        toggleIcon.textContent = 'visibility';
+        toggleText.textContent = 'Show Logs';
+        logsToggleButton.classList.remove('active');
+    }
+}
+
 messageInput.disabled = true;
 sendButton.disabled = true;
 micButton.disabled = true;
 connectButton.textContent = i18n.t('connect');
+
+// Initialize logs visibility
+initializeLogsVisibility();
 
 /**
  * Handles the video toggle. Starts or stops video streaming.

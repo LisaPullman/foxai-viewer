@@ -69,7 +69,7 @@ const handleOPTIONS = async () => {
 };
 
 // Use gemini-balance API pool instead of direct Google API
-const BASE_URL = "http://10.20200108.xyz:8000";
+const BASE_URL = "http://10.20200108.xyz";
 const API_VERSION = "v1";
 
 // Use hardcoded API key for gemini-balance

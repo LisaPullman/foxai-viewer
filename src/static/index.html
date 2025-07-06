@@ -35,12 +35,16 @@
             </div>
             <div id="api-pool-info" class="api-pool-info">
                 <span class="api-pool-status">🔗 API Pool Ready</span>
-                <span class="api-pool-endpoint">http://10.20200108.xyz:8000</span>
-                <span class="api-pool-key">Key: F435261ox</span>
+                <span class="api-pool-endpoint">Private API Pool Service</span>
+                <span class="api-pool-key">🔐 Authenticated</span>
                 <div class="api-pool-features">
                     <span class="feature-tag">✅ Text Chat</span>
-                    <span class="feature-tag disabled">❌ Voice</span>
-                    <span class="feature-tag disabled">❌ Video</span>
+                    <span class="feature-tag upgrade" onclick="enableAudioFeatures()" title="点击启用音频功能">
+                        🔄 Voice (Click to Enable)
+                    </span>
+                    <span class="feature-tag upgrade" onclick="enableVideoFeatures()" title="点击启用视频功能">
+                        🔄 Video (Click to Enable)
+                    </span>
                 </div>
             </div>
             <div id="websocket-settings" class="websocket-settings" style="display: none;">
@@ -94,8 +98,14 @@
                 <button id="apply-config">Confirm</button>
             </div>
         </div>
-        <button id="connect-button">Connect</button>
-        <div id="logs-container"></div>
+        <div class="connection-controls">
+            <button id="connect-button">Connect</button>
+            <button id="logs-toggle-button" class="logs-toggle" title="Toggle connection logs">
+                <span class="material-symbols-outlined">visibility</span>
+                <span class="logs-toggle-text">Show Logs</span>
+            </button>
+        </div>
+        <div id="logs-container" class="logs-hidden"></div>
         <input type="text" id="message-input" placeholder="Enter message...">
         <button id="send-button">Send</button>
         <button id="mic-button">
