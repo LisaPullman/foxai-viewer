@@ -1,0 +1,1653 @@
+:root {
+    --primary-color: #4285f4;
+    --secondary-color: #34a853;
+    --danger-color: #ea4335;
+    --background-color: #f0f0f0;
+    --surface-color: #fff;
+    --border-color: #ccc;
+    --text-color: #333;
+    --text-secondary: #666;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --primary-color-rgb: 66, 133, 244;
+    --foxai-orange: #ff6b35;
+    --foxai-gradient: linear-gradient(135deg, #ff6b35, #f7931e);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#app {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 1200px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+#logs-container {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    height: 350px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    transition: all 0.3s ease;
+    scroll-behavior: smooth;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#logs-container:hover {
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.log-entry {
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    word-wrap: break-word;
+    animation: slideInUp 0.4s ease-out;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+    font-size: 0.95em;
+}
+
+.log-entry:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.log-entry.system {
+    border-left: 4px solid #4caf50;
+    color: #2e7d32;
+}
+
+.log-entry.user {
+    border-left: 4px solid #2196f3;
+    color: #1565c0;
+}
+
+.log-entry.ai {
+    border-left: 4px solid #ff9800;
+    color: #e65100;
+}
+
+.log-entry .timestamp {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.85em;
+    font-weight: 500;
+    min-width: 80px;
+}
+
+.log-entry .emoji {
+    font-size: 1.2em;
+    min-width: 24px;
+}
+
+.log-entry .emoji {
+    margin-right: 5px;
+}
+
+#message-input {
+    width: calc(100% - 100px);
+    padding: 15px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    margin-right: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: #333;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+#message-input:focus {
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#message-input::placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+#send-button, #mic-button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4285f4, #1976d2);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    font-weight: 600;
+    font-size: 0.95em;
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#send-button:hover, #mic-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(66, 133, 244, 0.4);
+    background: linear-gradient(135deg, #5a95f5, #2196f3);
+}
+
+#send-button:active, #mic-button:active {
+    transform: translateY(1px);
+}
+
+#send-button::after, #mic-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+#send-button:active::after, #mic-button:active::after {
+    width: 200px;
+    height: 200px;
+}
+
+#audio-visualizer {
+    width: 100%;
+    height: 20px;
+    background-color: #eee;
+    margin-top: 10px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.audio-bar {
+    height: 100%;
+    background-color: #4285f4;
+    width: 0%;
+}
+
+/* Add a simple animation for the audio bars */
+@keyframes audio-pulse {
+    0% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(1.5);
+    }
+    100% {
+        transform: scaleY(1);
+    }
+}
+
+.audio-bar.active {
+    animation: audio-pulse 0.5s infinite;
+}
+
+#connect-button {
+    padding: 15px 30px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #34a853, #2e7d32);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(52, 168, 83, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+#connect-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(52, 168, 83, 0.4);
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+}
+
+#connect-button.connected {
+    background-color: #ea4335;
+}
+
+#video-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 480px;
+    z-index: 100;
+}
+
+#video-container video {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.video-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 101;
+}
+
+#stop-video {
+    background: #ea4335;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#stop-video:hover {
+    background: #d33426;
+}
+
+#flip-camera {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#camera-button {
+    background: #4285f4;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#camera-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#camera-button:active {
+    transform: translateY(1px);
+}
+
+#camera-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+#camera-button:active::after {
+    width: 200px;
+    height: 200px;
+}
+
+#camera-button.active {
+    background: #ea4335;
+}
+
+#frame-preview {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 120px;
+    height: 90px;
+    border: 2px solid rgba(66, 133, 244, 0.8);
+    border-radius: 4px;
+    background: #000;
+    z-index: 2;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+#frame-preview:hover {
+    transform: scale(1.1);
+    border-color: #4285f4;
+}
+
+#frame-preview.enlarged {
+    width: 480px;
+    height: 360px;
+    bottom: 50%;
+    right: 50%;
+    transform: translate(50%, 50%);
+    z-index: 4;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Add overlay when preview is enlarged */
+#frame-preview.enlarged::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* Improve video controls visibility */
+.video-controls {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#video-container:hover .video-controls {
+    opacity: 1;
+}
+
+#screen-button {
+    background: #4285f4;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#screen-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#screen-button:active {
+    transform: translateY(1px);
+}
+
+#screen-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+#screen-button:active::after {
+    width: 200px;
+    height: 200px;
+}
+
+#screen-button.active {
+    background: #ea4335;
+}
+
+/* Add styles for screen preview */
+#screen-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 480px;
+    height: 360px;
+    transition: all 0.3s ease;
+    display: none;
+    z-index: 1000;
+}
+
+#screen-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+    display: block;
+}
+
+/* Add hover effect */
+#screen-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Add a close button */
+#screen-container .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#screen-container:hover .close-button {
+    opacity: 1;
+}
+
+#screen-container .close-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.audio-visualizers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.visualizer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.visualizer-container label {
+    font-size: 0.8em;
+    color: #666;
+}
+
+#input-audio-visualizer,
+#audio-visualizer {
+    width: 100%;
+    height: 20px;
+    background-color: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#input-audio-visualizer .audio-bar {
+    height: 100%;
+    background-color: #34a853; /* Green for input audio */
+    width: 0%;
+}
+
+#audio-visualizer .audio-bar {
+    height: 100%;
+    background-color: #4285f4; /* Blue for output audio */
+    width: 0%;
+}
+
+/* Update the animation for both visualizers */
+@keyframes audio-pulse {
+    0% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(1.5);
+    }
+    100% {
+        transform: scaleY(1);
+    }
+}
+
+.audio-bar.active {
+    animation: audio-pulse 0.5s infinite;
+}
+
+.settings {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#api-key {
+    padding: 12px 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    width: 320px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: #333;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+#api-key:focus {
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#api-key::placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+#config-toggle {
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #4285f4;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    font-size: 1.2em;
+}
+
+#config-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+#config-toggle.active {
+    background: #4285f4;
+    color: white;
+    transform: rotate(180deg);
+}
+
+#mcp-tools-btn {
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff6b35;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    font-size: 1.2em;
+}
+
+#mcp-tools-btn:hover {
+    background: rgba(255, 107, 53, 0.1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+#mcp-tools-btn:active {
+    transform: scale(0.95);
+}
+
+#config-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    margin-bottom: 0;
+}
+
+#config-container.active {
+    max-height: 500px;
+    margin-bottom: 20px;
+}
+
+.config-wrapper {
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 15px;
+}
+
+.setting-container {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.setting-label {
+    font-weight: 600;
+    color: #333;
+    min-width: 120px;
+    font-size: 0.95em;
+}
+
+select {
+    padding: 10px 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: #333;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    outline: none;
+    cursor: pointer;
+}
+
+select:focus {
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+textarea {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: #333;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    outline: none;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+textarea:focus {
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+#apply-config {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4285f4, #1976d2);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+}
+
+#apply-config:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 133, 244, 0.4);
+}
+
+#voice-select  #response-type-select{
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+ 
+/* Configuration panel */
+#config-container {
+    background: var(--surface-color);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+#config-container.active {
+    display: block;
+}
+.config-wrapper {
+    display: grid;
+    gap: var(--spacing-md);
+    max-width: 600px;
+    margin: 0 auto;
+}
+#apply-config {
+    padding: var(--spacing-md);
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#apply-config:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#system-instruction {
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 14px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* 防止iOS Safari底部工具栏遮挡 */
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    #app {
+        padding: 15px;
+        width: 100%;
+        max-width: none;
+        border-radius: 15px;
+        margin: 0;
+    }
+
+    .hidden-mobile {
+        display: none;
+    }
+
+    /* Settings bar optimization for mobile */
+    .settings {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    #api-key {
+        width: 100%;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+
+    /* Button row for mobile */
+    .settings-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    #config-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+        display: block;
+        background: var(--surface-color);
+        padding: var(--spacing-lg);
+    }
+
+    #config-container.active {
+        transform: translateX(0);
+    }
+
+    .logs-wrapper {
+        max-height: 30vh;
+    }
+
+    #logs-container {
+        max-height: calc(30vh - 50px);
+    }
+
+    .input-controls {
+        position: sticky;
+        bottom: 0;
+        background: var(--surface-color);
+        padding: var(--spacing-md);
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+    }
+
+    .action-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .action-buttons button {
+        min-width: 44px; /* Touch target size */
+        min-height: 44px;
+        font-size: 1.1em;
+    }
+
+    /* Message input optimization */
+    #message-input {
+        width: calc(100% - 80px);
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 12px 15px;
+        /* 防止iOS键盘弹出时的布局问题 */
+        -webkit-appearance: none;
+        border-radius: 15px;
+    }
+
+    #send-button {
+        min-width: 60px;
+        padding: 12px;
+        /* 确保按钮在移动端易于点击 */
+        touch-action: manipulation;
+    }
+
+    /* 输入控制区域粘性定位 */
+    .input-controls {
+        position: sticky;
+        bottom: 0;
+        background: var(--surface-color);
+        padding: var(--spacing-md);
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        /* 支持iOS安全区域 */
+        padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom));
+    }
+
+    /* Connect button mobile optimization */
+    #connect-button {
+        width: 100%;
+        padding: 18px;
+        font-size: 1.2em;
+        margin-bottom: 15px;
+    }
+
+    #video-container {
+        width: 60%;
+        max-height: 40vh;
+        bottom: 0;
+        right: 0;
+    }
+
+    #screen-container {
+        width: 100%;
+        height: 50vh;
+        bottom: 0;
+        left: 0;
+        right: auto;
+    }
+}
+
+.setting-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.setting-label {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+
+.fps-help {
+    color: #666;
+    font-size: 12px;
+}
+
+/* FoxAI Brand Styles */
+.foxai-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px 0;
+    background: var(--foxai-gradient);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.foxai-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+}
+
+.foxai-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.foxai-icon {
+    font-size: 2.5rem;
+    animation: bounce 2s infinite ease-in-out;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.foxai-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.foxai-brand {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 1px;
+}
+
+.foxai-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    margin-top: -2px;
+}
+
+/* Animations */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    40% {
+        transform: translateY(-8px) rotate(-5deg);
+    }
+    60% {
+        transform: translateY(-4px) rotate(5deg);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(66, 133, 244, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(66, 133, 244, 0.6);
+    }
+}
+
+/* Responsive design for FoxAI header */
+@media (max-width: 768px) {
+    .foxai-header {
+        margin-bottom: 15px;
+        padding: 12px 0;
+    }
+
+    .foxai-logo {
+        gap: 8px;
+    }
+
+    .foxai-icon {
+        font-size: 2rem;
+    }
+
+    .foxai-brand {
+        font-size: 1.5rem;
+    }
+
+    .foxai-subtitle {
+        font-size: 0.8rem;
+    }
+}
+
+/* MCP Tool Manager Styles */
+.mcp-tool-manager {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    transition: opacity 0.3s ease;
+}
+
+.mcp-tool-manager.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mcp-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.mcp-modal {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.mcp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background: var(--foxai-gradient);
+    color: white;
+}
+
+.mcp-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.mcp-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.mcp-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.mcp-tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mcp-tab {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background: none;
+    color: #666;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.mcp-tab.active {
+    color: #4285f4;
+    border-bottom-color: #4285f4;
+    background: rgba(66, 133, 244, 0.1);
+}
+
+.mcp-tab:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.mcp-content {
+    height: 60vh;
+    overflow-y: auto;
+}
+
+.mcp-tab-content {
+    display: none;
+    padding: 30px;
+}
+
+.mcp-tab-content.active {
+    display: block;
+}
+
+/* Stats */
+.mcp-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.mcp-stat {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mcp-stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #4285f4;
+}
+
+.mcp-stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Tools List */
+.mcp-tools-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.mcp-tool-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.mcp-tool-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.mcp-tool-item.disabled {
+    opacity: 0.6;
+}
+
+.mcp-tool-icon {
+    font-size: 2rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+.mcp-tool-info {
+    flex: 1;
+}
+
+.mcp-tool-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.mcp-tool-info p {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.mcp-tool-category {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(66, 133, 244, 0.1);
+    color: #4285f4;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-right: 10px;
+}
+
+.mcp-tool-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.1);
+    color: #666;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+/* Toggle Switch */
+.mcp-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.mcp-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.mcp-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.mcp-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.mcp-toggle input:checked + .mcp-toggle-slider {
+    background-color: #4285f4;
+}
+
+.mcp-toggle input:checked + .mcp-toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Categories Grid */
+.mcp-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.mcp-category-card {
+    text-align: center;
+    padding: 30px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.mcp-category-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+}
+
+.mcp-category-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.mcp-category-card h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.mcp-category-card p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Settings Panel */
+.mcp-settings-panel h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.mcp-import-export {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.mcp-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4285f4, #1976d2);
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3);
+}
+
+.mcp-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.4);
+}
+
+.mcp-btn-danger {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    box-shadow: 0 2px 10px rgba(244, 67, 54, 0.3);
+}
+
+.mcp-btn-danger:hover {
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .mcp-modal {
+        margin: 10px;
+        max-height: 90vh;
+    }
+
+    .mcp-header {
+        padding: 15px 20px;
+    }
+
+    .mcp-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .mcp-tab-content {
+        padding: 20px;
+    }
+
+    .mcp-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mcp-tool-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .mcp-tool-controls {
+        align-self: stretch;
+        display: flex;
+        justify-content: center;
+    }
+
+    .mcp-import-export {
+        flex-direction: column;
+    }
+
+    .mcp-categories-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+/* Extra small screens (phones in portrait) */
+@media (max-width: 480px) {
+    body {
+        padding: 5px;
+    }
+
+    #app {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .foxai-header {
+        padding: 10px 0;
+        margin-bottom: 10px;
+    }
+
+    .foxai-brand {
+        font-size: 1.3rem;
+    }
+
+    .foxai-icon {
+        font-size: 1.8rem;
+    }
+
+    .settings {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    #logs-container {
+        height: 250px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .log-entry {
+        padding: 8px 10px;
+        gap: 8px;
+        font-size: 0.85em;
+    }
+
+    .log-entry .timestamp {
+        min-width: 60px;
+        font-size: 0.75em;
+    }
+
+    .input-controls {
+        padding: 10px;
+    }
+
+    #message-input {
+        width: calc(100% - 70px);
+        padding: 10px 12px;
+    }
+
+    #send-button {
+        min-width: 50px;
+        padding: 10px;
+    }
+
+    .action-buttons button {
+        min-width: 40px;
+        min-height: 40px;
+        padding: 8px;
+        font-size: 1em;
+    }
+
+    /* MCP Modal for small screens */
+    .mcp-modal {
+        margin: 5px;
+        max-height: 95vh;
+    }
+
+    .mcp-header {
+        padding: 10px 15px;
+    }
+
+    .mcp-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .mcp-tab-content {
+        padding: 15px;
+    }
+
+    .mcp-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .mcp-stat {
+        padding: 15px 10px;
+    }
+
+    .mcp-stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Landscape orientation optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+    #logs-container {
+        height: 200px;
+    }
+
+    .foxai-header {
+        padding: 8px 0;
+        margin-bottom: 10px;
+    }
+
+    .foxai-brand {
+        font-size: 1.4rem;
+    }
+
+    .foxai-icon {
+        font-size: 2rem;
+    }
+
+    #video-container {
+        width: 40%;
+        max-height: 60vh;
+    }
+}
+
+/* 触摸优化和无障碍功能 */
+@media (hover: none) and (pointer: coarse) {
+    /* 触摸设备专用样式 */
+    button, .mcp-toggle, select {
+        min-height: 44px;
+        min-width: 44px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+
+    /* 移除hover效果，避免触摸设备的粘滞hover */
+    button:hover, .log-entry:hover, .mcp-tool-item:hover {
+        transform: none;
+    }
+
+    /* 增强点击反馈 */
+    button:active, .mcp-toggle:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #000;
+        --text-color: #000;
+        --background-color: #fff;
+    }
+
+    .log-entry {
+        border: 2px solid var(--border-color);
+    }
+
+    button {
+        border: 2px solid var(--border-color);
+    }
+}
+
+/* 减少动画偏好支持 */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .foxai-icon {
+        animation: none;
+    }
+
+    .foxai-header::before {
+        animation: none;
+    }
+}
+
+/* 深色模式准备 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #1a1a1a;
+        --surface-color: #2d2d2d;
+        --text-color: #ffffff;
+        --text-secondary: #cccccc;
+        --border-color: #444444;
+    }
+
+    body {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+    }
+
+    #app {
+        background: rgba(45, 45, 45, 0.95);
+        color: var(--text-color);
+    }
+
+    .log-entry {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-color);
+    }
+
+    input, textarea, select {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-color);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    input::placeholder, textarea::placeholder {
+        color: var(--text-secondary);
+    }
+}
