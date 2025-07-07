@@ -354,8 +354,7 @@ async function connectToApiPool() {
 
     try {
         // Test API Pool connection with timeout
-        logMessage(`Testing connection to API Pool (${API_POOL_CONFIG.baseUrl})...`, 'system');
-        logMessage(`Using API Key: ${API_POOL_CONFIG.apiKey}`, 'system');
+        logMessage('Testing connection to Private API Pool...', 'system');
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
@@ -395,7 +394,7 @@ async function connectToApiPool() {
         if (error.name === 'AbortError') {
             errorMessage = 'Connection timeout (20s) - API Pool server may be unreachable';
         } else if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-            errorMessage = `Network error - Cannot reach ${API_POOL_CONFIG.baseUrl}`;
+            errorMessage = 'Network error - Cannot reach API Pool service';
         } else if (error.message.includes('TypeError')) {
             errorMessage = 'Network connectivity issue - Check internet connection';
         } else {
@@ -404,9 +403,9 @@ async function connectToApiPool() {
 
         Logger.error('API Pool connection error:', error);
         logMessage(`❌ Connection Error: ${errorMessage}`, 'system');
-        logMessage(`API Pool: ${API_POOL_CONFIG.baseUrl} connection failed`, 'system');
-        logMessage(`Authentication: Key ${API_POOL_CONFIG.apiKey}`, 'system');
-        logMessage(`💡 Tip: Check if ${API_POOL_CONFIG.baseUrl} is accessible from your network`, 'system');
+        logMessage('API Pool: Private service connection failed', 'system');
+        logMessage('Authentication: Verified credentials', 'system');
+        logMessage('💡 Tip: API Pool service may be temporarily unavailable', 'system');
 
         isConnected = false;
         connectButton.textContent = i18n.t('connect');
