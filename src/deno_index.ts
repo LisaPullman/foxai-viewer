@@ -127,4 +127,4 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 }
 
-Deno.serve({ port: 3000 }, handleRequest); 
+Deno.serve({ port: 8000 }, handleRequest);

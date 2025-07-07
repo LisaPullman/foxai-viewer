@@ -1,24 +1,65 @@
 :root {
+    /* 主色调 */
     --primary-color: #4285f4;
+    --primary-hover: #5a95f5;
     --secondary-color: #34a853;
     --danger-color: #ea4335;
+    --warning-color: #ff9800;
+    --info-color: #1976d2;
+
+    /* 背景和表面 */
     --background-color: #f0f0f0;
     --surface-color: #fff;
-    --border-color: #ccc;
+    --surface-hover: #f8f9fa;
+    --border-color: #e0e0e0;
+    --border-hover: #d0d0d0;
+
+    /* 文字颜色 */
     --text-color: #333;
     --text-secondary: #666;
+    --text-muted: #999;
+    --text-inverse: #fff;
+
+    /* 阴影和效果 */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
     --shadow-color: rgba(0, 0, 0, 0.1);
+
+    /* 圆角和间距 */
+    --border-radius-sm: 6px;
     --border-radius: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 20px;
+    --spacing-xs: 4px;
     --spacing-sm: 8px;
     --spacing-md: 16px;
     --spacing-lg: 24px;
-    --primary-color-rgb: 66, 133, 244;
+    --spacing-xl: 32px;
+
+    /* FoxAI品牌色 */
     --foxai-orange: #ff6b35;
     --foxai-gradient: linear-gradient(135deg, #ff6b35, #f7931e);
+    --foxai-blue: #4285f4;
+
+    /* 透明度 */
+    --opacity-light: 0.1;
+    --opacity-medium: 0.2;
+    --opacity-heavy: 0.3;
+
+    /* 动画 */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+
+    /* RGB值（用于rgba） */
+    --primary-color-rgb: 66, 133, 244;
+    --danger-color-rgb: 234, 67, 53;
+    --warning-color-rgb: 255, 152, 0;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     justify-content: center;
     align-items: center;
     display: flex;
@@ -27,21 +68,24 @@ body {
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     margin: 0;
-    padding: 20px;
+    padding: var(--spacing-lg);
     box-sizing: border-box;
+    color: var(--text-color);
+    line-height: 1.6;
 }
 
 #app {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, var(--opacity-medium));
     width: 90%;
     max-width: 1200px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, var(--opacity-medium));
     position: relative;
     overflow: hidden;
+    transition: var(--transition-normal);
 }
 
 #logs-container {
@@ -1020,6 +1064,9 @@ textarea:focus {
         padding-bottom: env(safe-area-inset-bottom);
         /* 优化移动端滚动 */
         -webkit-overflow-scrolling: touch;
+        overflow-x: hidden;
+        /* 防止双击缩放 */
+        touch-action: manipulation;
     }
 
     #app {

@@ -361,10 +361,10 @@ async function connectToApiPool() {
 
     try {
         // Test API Pool connection with timeout
-        logMessage('Testing connection to secure API pool...', 'system');
+        logMessage('Testing connection to API Pool (http://10.20200108.xyz)...', 'system');
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
 
         const response = await fetch(`${API_POOL_CONFIG.baseUrl}/v1/models`, {
             method: 'GET',
@@ -399,9 +399,11 @@ async function connectToApiPool() {
         let errorMessage = 'Unknown error';
 
         if (error.name === 'AbortError') {
-            errorMessage = 'Connection timeout - API Pool may be unreachable from this network';
+            errorMessage = 'Connection timeout (20s) - API Pool server may be unreachable';
         } else if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-            errorMessage = 'Network error - API Pool may be on internal network or blocked by firewall';
+            errorMessage = 'Network error - Cannot reach http://10.20200108.xyz';
+        } else if (error.message.includes('TypeError')) {
+            errorMessage = 'Network connectivity issue - Check internet connection';
         } else {
             errorMessage = error.message;
         }

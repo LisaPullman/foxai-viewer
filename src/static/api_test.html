@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Pool 连接测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .test-button {
+            background: linear-gradient(135deg, #4285f4, #1976d2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .test-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+        }
+        .result {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 API Pool 连接测试</h1>
+        
+        <div class="test-section">
+            <h3>📡 网络连通性测试</h3>
+            <button class="test-button" onclick="testPing()">测试网络连通性</button>
+            <button class="test-button" onclick="testDNS()">DNS解析测试</button>
+            <div id="network-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 API Pool 直连测试</h3>
+            <p><strong>目标地址:</strong> http://10.20200108.xyz</p>
+            <p><strong>API Key:</strong> F435261ox</p>
+            <button class="test-button" onclick="testAPIPoolDirect()">测试直连</button>
+            <button class="test-button" onclick="testAPIPoolModels()">获取模型列表</button>
+            <button class="test-button" onclick="testAPIPoolChat()">测试对话</button>
+            <div id="direct-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 本地代理测试</h3>
+            <p><strong>代理地址:</strong> http://localhost:8000</p>
+            <button class="test-button" onclick="testLocalProxy()">测试本地代理</button>
+            <button class="test-button" onclick="testProxyModels()">代理模型列表</button>
+            <button class="test-button" onclick="testProxyChat()">代理对话测试</button>
+            <div id="proxy-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 综合诊断</h3>
+            <button class="test-button" onclick="runAllTests()">运行所有测试</button>
+            <button class="test-button" onclick="clearResults()">清空结果</button>
+            <div id="summary-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.className = `result ${type}`;
+            element.textContent += `[${timestamp}] ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).textContent = '';
+            document.getElementById(elementId).className = 'result';
+        }
+
+        async function testPing() {
+            clearLog('network-result');
+            log('network-result', '正在测试网络连通性...', 'info');
+            
+            try {
+                // 使用fetch测试连通性
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch('http://10.20200108.xyz', {
+                    method: 'HEAD',
+                    signal: controller.signal,
+                    mode: 'no-cors'
+                });
+                
+                log('network-result', '✅ 网络连通性正常', 'success');
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    log('network-result', '❌ 连接超时 - 网络可能不通', 'error');
+                } else {
+                    log('network-result', `❌ 网络错误: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testDNS() {
+            log('network-result', '正在测试DNS解析...', 'info');
+            
+            try {
+                const start = Date.now();
+                const response = await fetch('http://10.20200108.xyz', {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                const time = Date.now() - start;
+                log('network-result', `✅ DNS解析成功 (${time}ms)`, 'success');
+            } catch (error) {
+                log('network-result', `❌ DNS解析失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPIPoolDirect() {
+            clearLog('direct-result');
+            log('direct-result', '正在测试API Pool直连...', 'info');
+            
+            try {
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(), 20000);
+                
+                const response = await fetch('http://10.20200108.xyz/v1/models', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer F435261ox',
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('direct-result', `✅ API Pool连接成功!`, 'success');
+                    log('direct-result', `状态码: ${response.status}`, 'success');
+                    log('direct-result', `可用模型: ${data.data?.length || 0}个`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    log('direct-result', `❌ API Pool响应错误: ${response.status}`, 'error');
+                    log('direct-result', `错误详情: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    log('direct-result', '❌ 连接超时 (20秒) - API Pool服务器无响应', 'error');
+                } else {
+                    log('direct-result', `❌ 连接失败: ${error.message}`, 'error');
+                }
+                log('direct-result', '💡 建议: 尝试使用本地代理模式', 'info');
+            }
+        }
+
+        async function testAPIPoolModels() {
+            log('direct-result', '正在获取模型列表...', 'info');
+            await testAPIPoolDirect();
+        }
+
+        async function testAPIPoolChat() {
+            log('direct-result', '正在测试对话功能...', 'info');
+            
+            try {
+                const response = await fetch('http://10.20200108.xyz/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer F435261ox',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'gemini-2.0-flash-exp',
+                        messages: [
+                            { role: 'user', content: '请简单回复"测试成功"' }
+                        ],
+                        max_tokens: 50
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const reply = data.choices?.[0]?.message?.content || '无回复';
+                    log('direct-result', `✅ 对话测试成功! AI回复: ${reply}`, 'success');
+                } else {
+                    log('direct-result', `❌ 对话测试失败: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('direct-result', `❌ 对话测试错误: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLocalProxy() {
+            clearLog('proxy-result');
+            log('proxy-result', '正在测试本地代理...', 'info');
+            
+            try {
+                const response = await fetch('/v1/models', {
+                    headers: {
+                        'Authorization': 'Bearer test-key',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('proxy-result', `✅ 本地代理连接成功!`, 'success');
+                    log('proxy-result', `可用模型: ${data.data?.length || 0}个`, 'success');
+                } else {
+                    log('proxy-result', `❌ 本地代理错误: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('proxy-result', `❌ 本地代理失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProxyModels() {
+            log('proxy-result', '正在通过代理获取模型...', 'info');
+            await testLocalProxy();
+        }
+
+        async function testProxyChat() {
+            log('proxy-result', '正在测试代理对话...', 'info');
+            
+            try {
+                const response = await fetch('/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer test-key',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'gemini-2.0-flash-exp',
+                        messages: [
+                            { role: 'user', content: '请简单回复"代理测试成功"' }
+                        ],
+                        max_tokens: 50
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const reply = data.choices?.[0]?.message?.content || '无回复';
+                    log('proxy-result', `✅ 代理对话成功! AI回复: ${reply}`, 'success');
+                } else {
+                    log('proxy-result', `❌ 代理对话失败: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('proxy-result', `❌ 代理对话错误: ${error.message}`, 'error');
+            }
+        }
+
+        async function runAllTests() {
+            clearLog('summary-result');
+            log('summary-result', '开始运行综合测试...', 'info');
+            
+            // 网络测试
+            await testPing();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // API Pool直连测试
+            await testAPIPoolDirect();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // 本地代理测试
+            await testLocalProxy();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            log('summary-result', '✅ 所有测试完成!', 'success');
+            log('summary-result', '请查看各个测试部分的详细结果', 'info');
+        }
+
+        function clearResults() {
+            ['network-result', 'direct-result', 'proxy-result', 'summary-result'].forEach(clearLog);
+        }
+
+        // 页面加载时显示基本信息
+        window.onload = function() {
+            log('summary-result', '🔗 API Pool 连接测试工具已加载', 'info');
+            log('summary-result', '目标: http://10.20200108.xyz (无端口号)', 'info');
+            log('summary-result', '点击上方按钮开始测试', 'info');
+        };
+    </script>
+</body>
+</html>
