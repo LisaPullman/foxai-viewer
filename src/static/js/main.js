@@ -38,6 +38,37 @@ const API_POOL_CONFIG = {
     endpoint: '/v1/chat/completions'
 };
 
+// Additional API Pool configurations to try
+const API_POOL_CONFIGS = [
+    {
+        apiKey: 'F435261ox',
+        baseUrl: 'http://10.20200108.xyz',
+        endpoint: '/v1/chat/completions'
+    },
+    {
+        apiKey: 'F435261ox',
+        baseUrl: 'http://10.20200108.xyz:8000',
+        endpoint: '/v1/chat/completions'
+    },
+    {
+        apiKey: 'F435261ox',
+        baseUrl: 'http://10.20200108.xyz',
+        endpoint: '/hf/v1/chat/completions'
+    },
+    {
+        apiKey: 'F435261ox',
+        baseUrl: 'http://10.20200108.xyz:8000',
+        endpoint: '/hf/v1/chat/completions'
+    }
+];
+
+// Additional endpoint configurations for Gemini Balance
+const API_POOL_ENDPOINTS = [
+    '/v1/chat/completions',      // Standard OpenAI format
+    '/hf/v1/chat/completions',   // Hugging Face format
+    '/openai/v1/chat/completions' // OpenAI specific format
+];
+
 // Fallback configuration using current domain as proxy
 const FALLBACK_CONFIG = {
     apiKey: 'F435261ox',
@@ -375,33 +406,48 @@ async function connectToApiPool() {
         let currentConfig = API_POOL_CONFIG;
         let connectionSuccessful = false;
 
-        // Try primary API Pool first
-        try {
-            logMessage('Testing connection to Primary API Pool...', 'system');
+        // Try different API Pool configurations for Gemini Balance compatibility
+        for (let i = 0; i < API_POOL_CONFIGS.length && !connectionSuccessful; i++) {
+            const config = API_POOL_CONFIGS[i];
+            try {
+                logMessage(`Testing API Pool: ${config.baseUrl}${config.endpoint}...`, 'system');
 
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-            const response = await fetch(`${API_POOL_CONFIG.baseUrl}/v1/models`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${API_POOL_CONFIG.apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                signal: controller.signal
-            });
+                // Try models endpoint first to test connectivity
+                const modelsEndpoint = config.endpoint.replace('/chat/completions', '/models');
+                const response = await fetch(`${config.baseUrl}${modelsEndpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${config.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
 
-            clearTimeout(timeoutId);
+                clearTimeout(timeoutId);
 
-            if (response.ok) {
-                const data = await response.json();
-                logMessage(`Primary API Pool: Found ${data.data?.length || 0} models available`, 'system');
-                connectionSuccessful = true;
-            } else {
-                throw new Error(`Primary API Pool failed: ${response.status}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    logMessage(`✅ API Pool connected: ${config.baseUrl}${config.endpoint}`, 'system');
+                    logMessage(`Found ${data.data?.length || data.models?.length || 0} models available`, 'system');
+                    
+                    // Update current config with working configuration
+                    currentConfig = config;
+                    connectionSuccessful = true;
+                    break;
+                } else {
+                    logMessage(`Config ${i+1} returned ${response.status}`, 'system');
+                }
+            } catch (configError) {
+                logMessage(`Config ${i+1} failed: ${configError.name}`, 'system');
+                continue;
             }
-        } catch (primaryError) {
-            logMessage('Primary API Pool unavailable, trying fallback...', 'system');
+        }
+
+        if (!connectionSuccessful) {
+            logMessage('All API Pool endpoints failed, trying fallback...', 'system');
             
             // Try fallback configuration
             try {
@@ -662,7 +708,7 @@ async function sendMessageToApiPool(message) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gemini-2.0-flash-exp',
+                model: 'gemini-1.5-pro',  // Use a more stable model for Gemini Balance
                 messages: [
                     {
                         role: 'system',

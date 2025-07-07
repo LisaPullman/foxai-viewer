@@ -83,24 +83,39 @@ const makeHeaders = (apiKey, more) => ({
 
 // Try multiple API endpoints with fallback
 async function tryFetch(endpoint, options) {
-  const urls = [PRIMARY_BASE_URL, FALLBACK_BASE_URL];
+  // Gemini Balance API endpoints to try
+  const apiConfigs = [
+    { baseUrl: "http://10.20200108.xyz", endpoint: endpoint },
+    { baseUrl: "http://10.20200108.xyz:8000", endpoint: endpoint },
+    { baseUrl: "http://10.20200108.xyz", endpoint: endpoint.replace('/v1/', '/hf/v1/') },
+    { baseUrl: "http://10.20200108.xyz:8000", endpoint: endpoint.replace('/v1/', '/hf/v1/') },
+    { baseUrl: FALLBACK_BASE_URL, endpoint: endpoint }
+  ];
+  
   let lastError = null;
   
-  for (const baseUrl of urls) {
+  for (const config of apiConfigs) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout per URL
       
-      const response = await fetch(`${baseUrl}${endpoint}`, {
+      console.log(`Trying: ${config.baseUrl}${config.endpoint}`);
+      const response = await fetch(`${config.baseUrl}${config.endpoint}`, {
         ...options,
         signal: controller.signal
       });
       
       clearTimeout(timeoutId);
-      return response;
+      
+      if (response.ok) {
+        console.log(`✅ Success: ${config.baseUrl}${config.endpoint}`);
+        return response;
+      } else {
+        console.log(`❌ HTTP ${response.status}: ${config.baseUrl}${config.endpoint}`);
+      }
     } catch (error) {
       lastError = error;
-      console.log(`Failed to connect to ${baseUrl}: ${error.message}`);
+      console.log(`Failed to connect to ${config.baseUrl}${config.endpoint}: ${error.message}`);
       continue;
     }
   }
