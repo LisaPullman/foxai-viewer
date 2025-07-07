@@ -38,6 +38,13 @@ const API_POOL_CONFIG = {
     endpoint: '/v1/chat/completions'
 };
 
+// Fallback configuration using current domain as proxy
+const FALLBACK_CONFIG = {
+    apiKey: 'F435261ox',
+    baseUrl: window.location.origin,  // Use current domain as proxy
+    endpoint: '/v1/chat/completions'
+};
+
 // DOM Elements
 const connectionModeSelect = document.getElementById('connection-mode-select');
 const apiPoolInfo = document.getElementById('api-pool-info');
@@ -353,27 +360,70 @@ async function connectToApiPool() {
     localStorage.setItem('system_instruction', systemInstructionInput.value);
 
     try {
-        // Test API Pool connection with timeout
-        logMessage('Testing connection to Private API Pool...', 'system');
+        let currentConfig = API_POOL_CONFIG;
+        let connectionSuccessful = false;
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+        // Try primary API Pool first
+        try {
+            logMessage('Testing connection to Primary API Pool...', 'system');
 
-        const response = await fetch(`${API_POOL_CONFIG.baseUrl}/v1/models`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${API_POOL_CONFIG.apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            signal: controller.signal
-        });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-        clearTimeout(timeoutId);
+            const response = await fetch(`${API_POOL_CONFIG.baseUrl}/v1/models`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${API_POOL_CONFIG.apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                signal: controller.signal
+            });
 
-        if (response.ok) {
-            const data = await response.json();
-            logMessage(`Found ${data.data?.length || 0} models available`, 'system');
+            clearTimeout(timeoutId);
 
+            if (response.ok) {
+                const data = await response.json();
+                logMessage(`Primary API Pool: Found ${data.data?.length || 0} models available`, 'system');
+                connectionSuccessful = true;
+            } else {
+                throw new Error(`Primary API Pool failed: ${response.status}`);
+            }
+        } catch (primaryError) {
+            logMessage('Primary API Pool unavailable, trying fallback...', 'system');
+            
+            // Try fallback configuration
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+                const response = await fetch(`${FALLBACK_CONFIG.baseUrl}/v1/models`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${FALLBACK_CONFIG.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    logMessage(`Fallback API: Found ${data.data?.length || 0} models available`, 'system');
+                    currentConfig = FALLBACK_CONFIG;
+                    connectionSuccessful = true;
+                } else {
+                    throw new Error(`Fallback API failed: ${response.status}`);
+                }
+            } catch (fallbackError) {
+                throw new Error('Both primary and fallback APIs are unavailable');
+            }
+        }
+
+        if (connectionSuccessful) {
+            // Store which config is working
+            window.activeApiConfig = currentConfig;
+            
             isConnected = true;
             connectButton.textContent = i18n.t('disconnect');
             connectButton.classList.add('connected');
@@ -383,16 +433,17 @@ async function connectToApiPool() {
             micButton.disabled = true;
             cameraButton.disabled = true;
             screenButton.disabled = true;
-            logMessage('✅ Connected to API Pool Successfully', 'system', 'connected');
+            
+            const source = currentConfig === API_POOL_CONFIG ? 'Primary' : 'Fallback';
+            logMessage(`✅ Connected to ${source} API Pool Successfully`, 'system', 'connected');
         } else {
-            const errorText = await response.text();
-            throw new Error(`API Pool connection failed: ${response.status} - ${errorText}`);
+            throw new Error('Connection failed for unknown reasons');
         }
     } catch (error) {
         let errorMessage = 'Unknown error';
 
         if (error.name === 'AbortError') {
-            errorMessage = 'Connection timeout (20s) - API Pool server may be unreachable';
+            errorMessage = 'Connection timeout - API Pool server may be unreachable';
         } else if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
             errorMessage = 'Network error - Cannot reach API Pool service';
         } else if (error.message.includes('TypeError')) {
@@ -539,14 +590,17 @@ async function sendMessageToApiPool(message) {
     logMessage(message, 'user');
     logMessage('🔄 Sending to API Pool...', 'system');
 
+    // Use the active config that was successfully connected
+    const activeConfig = window.activeApiConfig || API_POOL_CONFIG;
+
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-        const response = await fetch(`${API_POOL_CONFIG.baseUrl}${API_POOL_CONFIG.endpoint}`, {
+        const response = await fetch(`${activeConfig.baseUrl}${activeConfig.endpoint}`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${API_POOL_CONFIG.apiKey}`,
+                'Authorization': `Bearer ${activeConfig.apiKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
