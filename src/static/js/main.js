@@ -38,13 +38,6 @@ const API_POOL_CONFIG = {
     endpoint: '/v1/chat/completions'
 };
 
-// Fallback configuration for testing (using local proxy)
-const FALLBACK_CONFIG = {
-    apiKey: 'test-key',
-    baseUrl: window.location.origin,
-    endpoint: '/v1/chat/completions'
-};
-
 // DOM Elements
 const connectionModeSelect = document.getElementById('connection-mode-select');
 const apiPoolInfo = document.getElementById('api-pool-info');
@@ -361,7 +354,8 @@ async function connectToApiPool() {
 
     try {
         // Test API Pool connection with timeout
-        logMessage('Testing connection to API Pool (http://10.20200108.xyz)...', 'system');
+        logMessage(`Testing connection to API Pool (${API_POOL_CONFIG.baseUrl})...`, 'system');
+        logMessage(`Using API Key: ${API_POOL_CONFIG.apiKey}`, 'system');
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
@@ -401,7 +395,7 @@ async function connectToApiPool() {
         if (error.name === 'AbortError') {
             errorMessage = 'Connection timeout (20s) - API Pool server may be unreachable';
         } else if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-            errorMessage = 'Network error - Cannot reach http://10.20200108.xyz';
+            errorMessage = `Network error - Cannot reach ${API_POOL_CONFIG.baseUrl}`;
         } else if (error.message.includes('TypeError')) {
             errorMessage = 'Network connectivity issue - Check internet connection';
         } else {
@@ -410,9 +404,9 @@ async function connectToApiPool() {
 
         Logger.error('API Pool connection error:', error);
         logMessage(`❌ Connection Error: ${errorMessage}`, 'system');
-        logMessage('API Pool: Private service connection failed', 'system');
-        logMessage('Authentication: Verified credentials', 'system');
-        logMessage(`💡 Tip: If API Pool is on internal network, try WebSocket mode instead`, 'system');
+        logMessage(`API Pool: ${API_POOL_CONFIG.baseUrl} connection failed`, 'system');
+        logMessage(`Authentication: Key ${API_POOL_CONFIG.apiKey}`, 'system');
+        logMessage(`💡 Tip: Check if ${API_POOL_CONFIG.baseUrl} is accessible from your network`, 'system');
 
         isConnected = false;
         connectButton.textContent = i18n.t('connect');
