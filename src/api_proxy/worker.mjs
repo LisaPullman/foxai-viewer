@@ -68,8 +68,9 @@ const handleOPTIONS = async () => {
   });
 };
 
-// Use gemini-balance API pool instead of direct Google API
-const BASE_URL = "http://10.20200108.xyz";
+// Use gemini-balance API pool with fallback
+const PRIMARY_BASE_URL = "http://10.20200108.xyz";
+const FALLBACK_BASE_URL = "https://foxai-viewer.deno.dev";
 const API_VERSION = "v1";
 
 // Use hardcoded API key for gemini-balance
@@ -80,8 +81,35 @@ const makeHeaders = (apiKey, more) => ({
   ...more
 });
 
+// Try multiple API endpoints with fallback
+async function tryFetch(endpoint, options) {
+  const urls = [PRIMARY_BASE_URL, FALLBACK_BASE_URL];
+  let lastError = null;
+  
+  for (const baseUrl of urls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout per URL
+      
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        ...options,
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      lastError = error;
+      console.log(`Failed to connect to ${baseUrl}: ${error.message}`);
+      continue;
+    }
+  }
+  
+  throw lastError;
+}
+
 async function handleModels (apiKey) {
-  const response = await fetch(`${BASE_URL}/${API_VERSION}/models`, {
+  const response = await tryFetch(`/${API_VERSION}/models`, {
     headers: makeHeaders(apiKey),
   });
   let { body } = response;
@@ -115,7 +143,7 @@ async function handleEmbeddings (req, apiKey) {
     req.model = DEFAULT_EMBEDDINGS_MODEL;
     model = "models/" + req.model;
   }
-  const response = await fetch(`${BASE_URL}/${API_VERSION}/embeddings`, {
+  const response = await tryFetch(`/${API_VERSION}/embeddings`, {
     method: "POST",
     headers: makeHeaders(apiKey),
     body: JSON.stringify({
@@ -154,7 +182,7 @@ async function handleCompletions (req, apiKey) {
       model = req.model;
   }
   // Use OpenAI-compatible chat completions endpoint for gemini-balance
-  const response = await fetch(`${BASE_URL}/${API_VERSION}/chat/completions`, {
+  const response = await tryFetch(`/${API_VERSION}/chat/completions`, {
     method: "POST",
     headers: makeHeaders(apiKey),
     body: JSON.stringify({
