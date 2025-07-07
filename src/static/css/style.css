@@ -247,13 +247,15 @@ body {
     align-items: center; /* 确保按钮垂直居中对齐 */
     justify-content: center;
     margin-bottom: 20px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    /* 强制水平对齐 */
+    align-items: stretch;
 }
 
 /* Unified button styles for connection controls */
 #connect-button,
 .logs-toggle {
-    padding: 15px 25px;
+    padding: 0;
     border: none;
     border-radius: 15px;
     color: white;
@@ -269,15 +271,22 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
     overflow: hidden;
-    /* 固定高度确保完全对齐 */
-    height: 52px;
-    min-width: 150px;
-    /* 确保基线对齐 */
-    vertical-align: middle;
+    /* 固定尺寸确保完全对齐 */
+    height: 54px;
+    width: 160px;
+    /* 确保完全对齐 */
+    flex-shrink: 0;
+    flex-grow: 0;
     box-sizing: border-box;
     /* 添加玻璃拟态效果 */
     backdrop-filter: blur(10px);
     background-clip: padding-box;
+    /* 重置所有边距 */
+    margin: 0;
+    line-height: 1;
+    /* 确保文本居中 */
+    text-align: center;
+    vertical-align: top;
 }
 
 /* Connect button specific styles */
@@ -369,27 +378,22 @@ body {
     line-height: 1;
 }
 
-/* Logs Container States */
-.logs-hidden {
-    display: none !important;
-}
-
-.logs-visible {
-    display: block !important;
-}
+/* Logs Container States - 移除，现在始终显示容器 */
 
 /* 额外的对齐保障和桌面端优化 */
 @media (min-width: 769px) {
     .connection-controls {
-        align-items: center; /* 桌面端居中对齐 */
+        align-items: stretch; /* 桌面端拉伸对齐 */
         gap: 20px; /* 桌面端增加间距 */
+        flex-wrap: nowrap; /* 桌面端不换行 */
     }
 
     #connect-button,
     .logs-toggle {
         flex-shrink: 0; /* 防止按钮收缩 */
-        align-self: center; /* 确保自身居中 */
-        min-width: 160px; /* 桌面端增加最小宽度 */
+        flex-grow: 0; /* 防止按钮增长 */
+        width: 180px; /* 桌面端固定宽度 */
+        height: 56px; /* 桌面端固定高度 */
     }
 }
 
@@ -1200,11 +1204,14 @@ textarea:focus {
     #connect-button,
     .logs-toggle {
         width: 100%;
-        padding: 18px 25px;
+        padding: 0;
         font-size: 1.1em;
         margin-bottom: 0;
         height: 58px; /* 移动端增加高度 */
         justify-content: center;
+        align-items: center;
+        display: flex;
+        gap: 8px;
         box-sizing: border-box;
         border-radius: 18px; /* 移动端增加圆角 */
         /* 移动端增强触摸反馈 */
@@ -1804,6 +1811,12 @@ textarea:focus {
         font-size: 1em;
         height: 55px;
         border-radius: 16px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-sizing: border-box;
     }
 
     .settings {

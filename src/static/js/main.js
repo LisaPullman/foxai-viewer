@@ -176,16 +176,11 @@ const client = new MultimodalLiveClient();
  * @param {string} [translationKey=''] - Optional translation key for the message.
  */
 function logMessage(message, type = 'system', translationKey = '') {
-    // If logs are hidden and this is a system message, don't display it
-    if (!isLogsVisible && type === 'system') {
-        return;
-    }
-
     const logEntry = document.createElement('div');
     logEntry.classList.add('log-entry', type);
 
-    // Only show timestamp and system emoji for system messages when logs are visible
-    if (type === 'system' && isLogsVisible) {
+    // Add timestamp for all messages
+    if (type === 'system' || type === 'user' || type === 'ai') {
         const timestamp = document.createElement('span');
         timestamp.classList.add('timestamp');
         timestamp.textContent = new Date().toLocaleTimeString();
@@ -196,17 +191,19 @@ function logMessage(message, type = 'system', translationKey = '') {
     emoji.classList.add('emoji');
     switch (type) {
         case 'system':
-            if (isLogsVisible) {
-                emoji.textContent = '⚙️';
-            } else {
-                return; // Don't show system messages when logs are hidden
-            }
+            emoji.textContent = '⚙️';
+            // 系统消息只在显示日志时可见
+            logEntry.style.display = isLogsVisible ? 'flex' : 'none';
             break;
         case 'user':
             emoji.textContent = '🫵';
+            // 用户消息始终可见
+            logEntry.style.display = 'flex';
             break;
         case 'ai':
             emoji.textContent = '🤖';
+            // AI消息始终可见
+            logEntry.style.display = 'flex';
             break;
     }
     logEntry.appendChild(emoji);
@@ -714,21 +711,17 @@ function toggleLogsVisibility() {
     const toggleText = logsToggleButton.querySelector('.logs-toggle-text');
 
     if (isLogsVisible) {
-        logsContainer.classList.remove('logs-hidden');
-        logsContainer.classList.add('logs-visible');
         logsToggleButton.classList.add('active');
         toggleIcon.textContent = 'visibility_off';
-        toggleText.textContent = 'Hide Logs';
-        // Refresh the display to show system messages
+        toggleText.textContent = i18n.t('hideLogs');
+        // 显示所有消息（包括系统技术日志）
         refreshLogsDisplay();
-        logMessage('📋 Connection logs are now visible', 'system');
+        logMessage('📋 技术日志已显示', 'system');
     } else {
-        logsContainer.classList.remove('logs-visible');
-        logsContainer.classList.add('logs-hidden');
         logsToggleButton.classList.remove('active');
         toggleIcon.textContent = 'visibility';
-        toggleText.textContent = 'Show Logs';
-        // Refresh the display to hide system messages
+        toggleText.textContent = i18n.t('showLogs');
+        // 只显示用户和AI对话
         refreshLogsDisplay();
     }
 
@@ -771,12 +764,7 @@ function refreshLogsDisplay() {
  * Initialize logs visibility from localStorage
  */
 function initializeLogsVisibility() {
-    const logsContainer = document.getElementById('logs-container');
     const savedLogsVisible = localStorage.getItem('logs_visible');
-
-    // Always show the logs container, but control what's displayed inside
-    logsContainer.classList.remove('logs-hidden');
-    logsContainer.classList.add('logs-visible');
 
     if (savedLogsVisible === 'true') {
         isLogsVisible = false; // Set to false first so toggle works correctly
@@ -787,8 +775,9 @@ function initializeLogsVisibility() {
         const toggleIcon = logsToggleButton.querySelector('.material-symbols-outlined');
         const toggleText = logsToggleButton.querySelector('.logs-toggle-text');
         toggleIcon.textContent = 'visibility';
-        toggleText.textContent = 'Show Logs';
+        toggleText.textContent = i18n.t('showLogs');
         logsToggleButton.classList.remove('active');
+        refreshLogsDisplay(); // 初始化时刷新显示
     }
 }
 

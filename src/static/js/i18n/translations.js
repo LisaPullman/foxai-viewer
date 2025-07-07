@@ -65,6 +65,10 @@ export const translations = {
         serverError: "Server error: ",
         apiKeyRequired: "Please input API Key",
         
+        // Logs
+        showLogs: "Show Logs",
+        hideLogs: "Hide Logs",
+        
         // Languages
         languages: {
             en: "English",
@@ -134,6 +138,10 @@ export const translations = {
         connectionError: "连接错误：",
         serverError: "服务器错误：",
         apiKeyRequired: "请输入 API 密钥",
+        
+        // Logs
+        showLogs: "日志",
+        hideLogs: "隐藏日志",
         
         // Languages
         languages: {
@@ -205,6 +213,10 @@ export const translations = {
         serverError: "Serverfehler: ",
         apiKeyRequired: "Bitte API-Schlüssel eingeben",
         
+        // Logs
+        showLogs: "Protokolle anzeigen",
+        hideLogs: "Protokolle verbergen",
+        
         // Languages
         languages: {
             en: "English",
@@ -274,6 +286,10 @@ export const translations = {
         connectionError: "Erreur de connexion : ",
         serverError: "Erreur du serveur : ",
         apiKeyRequired: "Veuillez saisir la clé API",
+        
+        // Logs
+        showLogs: "Afficher les journaux",
+        hideLogs: "Masquer les journaux",
         
         // Languages
         languages: {
