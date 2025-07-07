@@ -45,6 +45,18 @@ const FALLBACK_CONFIG = {
     endpoint: '/v1/chat/completions'
 };
 
+// Emergency fallback - direct demo mode
+const DEMO_CONFIG = {
+    enabled: true,
+    responses: [
+        "Hello! I'm FoxAI's demo assistant. The API Pool service is currently unavailable, but you can still interact with this demo interface.",
+        "This is a demonstration response. The live API service will provide real AI responses when available.",
+        "I'm running in demo mode since the API Pool service is temporarily unavailable. Please try again later for full functionality.",
+        "Demo mode active: Your message was received, but I can only provide pre-configured responses right now.",
+        "FoxAI demo is working! Switch to WebSocket mode with your own Gemini API key for full functionality."
+    ]
+};
+
 // DOM Elements
 const connectionModeSelect = document.getElementById('connection-mode-select');
 const apiPoolInfo = document.getElementById('api-pool-info');
@@ -416,7 +428,14 @@ async function connectToApiPool() {
                     throw new Error(`Fallback API failed: ${response.status}`);
                 }
             } catch (fallbackError) {
-                throw new Error('Both primary and fallback APIs are unavailable');
+                // Try demo mode as last resort
+                if (DEMO_CONFIG.enabled) {
+                    logMessage('Enabling demo mode for offline functionality...', 'system');
+                    currentConfig = { ...DEMO_CONFIG, baseUrl: 'demo', endpoint: '/demo' };
+                    connectionSuccessful = true;
+                } else {
+                    throw new Error('Both primary and fallback APIs are unavailable');
+                }
             }
         }
 
@@ -434,8 +453,31 @@ async function connectToApiPool() {
             cameraButton.disabled = true;
             screenButton.disabled = true;
             
-            const source = currentConfig === API_POOL_CONFIG ? 'Primary' : 'Fallback';
-            logMessage(`✅ Connected to ${source} API Pool Successfully`, 'system', 'connected');
+            let source = 'Demo Mode';
+            if (currentConfig === API_POOL_CONFIG) source = 'Primary API Pool';
+            else if (currentConfig === FALLBACK_CONFIG) source = 'Fallback API';
+            
+            logMessage(`✅ Connected to ${source} Successfully`, 'system', 'connected');
+            
+            // Update UI status display
+            const statusElement = document.getElementById('api-pool-status');
+            const endpointElement = document.getElementById('api-pool-endpoint');
+            const keyElement = document.getElementById('api-pool-key');
+            
+            if (currentConfig.baseUrl === 'demo') {
+                statusElement.textContent = '🎭 Demo Mode Active';
+                endpointElement.textContent = 'Offline Demonstration';
+                keyElement.textContent = '🔄 Limited Functionality';
+                logMessage('🎭 Demo Mode: Limited responses available. Use WebSocket mode for full AI functionality.', 'system');
+            } else if (currentConfig === FALLBACK_CONFIG) {
+                statusElement.textContent = '🔄 Fallback Active';
+                endpointElement.textContent = 'Backup Service';
+                keyElement.textContent = '🔐 Connected';
+            } else {
+                statusElement.textContent = '🔗 API Pool Ready';
+                endpointElement.textContent = 'Private API Service';
+                keyElement.textContent = '🔐 Authenticated';
+            }
         } else {
             throw new Error('Connection failed for unknown reasons');
         }
@@ -588,10 +630,26 @@ async function handleSendMessage() {
  */
 async function sendMessageToApiPool(message) {
     logMessage(message, 'user');
-    logMessage('🔄 Sending to API Pool...', 'system');
-
+    
     // Use the active config that was successfully connected
     const activeConfig = window.activeApiConfig || API_POOL_CONFIG;
+
+    // Handle demo mode
+    if (activeConfig.baseUrl === 'demo') {
+        logMessage('🎭 Processing in demo mode...', 'system');
+        
+        // Simulate processing delay
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+        
+        // Get a random demo response
+        const randomIndex = Math.floor(Math.random() * DEMO_CONFIG.responses.length);
+        const demoResponse = DEMO_CONFIG.responses[randomIndex];
+        
+        logMessage(demoResponse, 'ai');
+        return;
+    }
+
+    logMessage('🔄 Sending to API Pool...', 'system');
 
     try {
         const controller = new AbortController();
