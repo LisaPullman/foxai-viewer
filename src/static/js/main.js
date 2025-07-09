@@ -190,13 +190,13 @@ if (savedSystemInstruction) {
 
 // Handle configuration panel toggle
 configToggle.addEventListener('click', () => {
-    configContainer.classList.toggle('active');
+    configContainer.classList.toggle('hidden-mobile');
     configToggle.classList.toggle('active');
 });
 
 applyConfigButton.addEventListener('click', () => {
-    configContainer.classList.toggle('active');
-    configToggle.classList.toggle('active');
+    configContainer.classList.add('hidden-mobile');
+    configToggle.classList.remove('active');
 });
 
 // Handle MCP tools button

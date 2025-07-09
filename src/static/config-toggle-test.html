@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config Toggle Test - FoxAI</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- FoxAI Brand Header -->
+        <div class="foxai-header">
+            <div class="foxai-logo">
+                <div class="foxai-icon">🦊</div>
+                <div class="foxai-text">
+                    <span class="foxai-brand">FoxAI</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings">
+            <div class="connection-mode">
+                <label for="connection-mode-select">Connection Mode:</label>
+                <select id="connection-mode-select">
+                    <option value="api-pool" selected>🔗 API Pool (Text Only)</option>
+                    <option value="websocket">🎤 WebSocket (Full Features)</option>
+                </select>
+            </div>
+            <div class="api-pool-info">
+                <span class="api-pool-status">🔗 API Pool Ready</span>
+                <span class="api-pool-endpoint">http://10.20200108.xyz</span>
+                <span class="api-pool-key">🔐 Key: F435261ox</span>
+                <div class="api-pool-features">
+                    <span class="feature-tag">✅ Text Chat</span>
+                    <span class="feature-tag upgrade">🔄 Voice (Click to Enable)</span>
+                    <span class="feature-tag upgrade">🔄 Video (Click to Enable)</span>
+                </div>
+            </div>
+            <div class="settings-buttons">
+                <button id="config-toggle" class="icon-button material-symbols-outlined" title="Settings">settings</button>
+                <button id="mcp-tools-btn" class="icon-button material-symbols-outlined" title="MCP Tools Manager">extension</button>
+            </div>
+        </div>
+
+        <!-- Configuration Container -->
+        <div id="config-container" class="hidden-mobile">
+            <div class="config-wrapper">
+                <div class="setting-container">
+                    <span class="setting-label">UI Language:</span>
+                    <select id="ui-language-select">
+                        <option value="en">English</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label">Voice Language:</span>
+                    <select id="language-select">
+                        <option value="en">English</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label">Sound:</span>
+                    <select id="voice-select">
+                        <option value="Puck">Puck (Male)</option>
+                        <option value="Charon">Charon (Male)</option>
+                        <option value="Fenrir">Fenrir (Male)</option>
+                        <option value="Kore">Kore (Female)</option>
+                        <option value="Aoede" selected>Aoede (Female)</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label">Response Type:</span>
+                    <select id="response-type-select">
+                        <option value="text">Text</option>
+                        <option value="audio" selected>Audio</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label">Video FPS:</span>
+                    <input type="number" id="fps-input" placeholder="Video FPS" value="1" min="1" max="30" step="1"/>
+                    <span class="fps-help">Higher FPS need more network bandwidth</span>
+                </div>
+                <textarea id="system-instruction" placeholder="Enter custom system instructions..." rows="6">You are my helpful assistant. You can see and hear me, and respond with voice and text.</textarea>
+                <button id="apply-config">✅ Confirm Settings</button>
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+            <h3>🔧 Toggle Test Status</h3>
+            <div id="status-display">
+                <p><strong>Config Container Classes:</strong> <span id="container-classes"></span></p>
+                <p><strong>Toggle Button Classes:</strong> <span id="button-classes"></span></p>
+                <p><strong>Container Visibility:</strong> <span id="container-visibility"></span></p>
+                <p><strong>Container Display:</strong> <span id="container-display"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get elements
+        const configToggle = document.getElementById('config-toggle');
+        const configContainer = document.getElementById('config-container');
+        
+        // Status display elements
+        const containerClasses = document.getElementById('container-classes');
+        const buttonClasses = document.getElementById('button-classes');
+        const containerVisibility = document.getElementById('container-visibility');
+        const containerDisplay = document.getElementById('container-display');
+
+        // Update status display
+        function updateStatus() {
+            containerClasses.textContent = configContainer.className;
+            buttonClasses.textContent = configToggle.className;
+            
+            const computedStyle = getComputedStyle(configContainer);
+            containerVisibility.textContent = computedStyle.visibility;
+            containerDisplay.textContent = computedStyle.display;
+        }
+
+        // Handle configuration panel toggle
+        configToggle.addEventListener('click', () => {
+            console.log('Config toggle clicked!');
+            configContainer.classList.toggle('hidden-mobile');
+            configToggle.classList.toggle('active');
+            updateStatus();
+        });
+
+        // Initial status update
+        updateStatus();
+
+        // Log initial state
+        console.log('Initial config container classes:', configContainer.className);
+        console.log('Initial toggle button classes:', configToggle.className);
+    </script>
+</body>
+</html>

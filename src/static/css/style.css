@@ -1216,6 +1216,20 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+#config-toggle.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: rotate(180deg);
+    box-shadow: var(--shadow-lg);
+}
+
+#config-toggle.active:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: rotate(180deg) scale(1.05);
+}
+
 #mcp-tools-btn {
     color: var(--foxai-orange);
 }
@@ -1255,8 +1269,11 @@ body {
         will-change: transform;
     }
 
-    .hidden-mobile {
-        display: none;
+    #config-container.hidden-mobile {
+        opacity: 0;
+        visibility: hidden;
+        max-height: 0;
+        overflow: hidden;
     }
 
     /* Settings bar optimization for mobile */

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Toggle Test</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debug-info">
+        <div>Container Classes: <span id="container-classes"></span></div>
+        <div>Button Classes: <span id="button-classes"></span></div>
+        <div>Visibility: <span id="visibility"></span></div>
+        <div>Opacity: <span id="opacity"></span></div>
+        <div>Max Height: <span id="max-height"></span></div>
+    </div>
+
+    <div id="app">
+        <div class="foxai-header">
+            <div class="foxai-logo">
+                <div class="foxai-icon">🦊</div>
+                <div class="foxai-text">
+                    <span class="foxai-brand">FoxAI</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings">
+            <div class="connection-mode">
+                <label>Connection Mode:</label>
+                <select>
+                    <option>🔗 API Pool (Text Only)</option>
+                </select>
+            </div>
+            <div class="settings-buttons">
+                <button id="config-toggle" class="icon-button material-symbols-outlined" title="Settings">settings</button>
+            </div>
+        </div>
+
+        <div id="config-container" class="hidden-mobile">
+            <div class="config-wrapper">
+                <h3>⚙️ Configuration Panel</h3>
+                <div class="setting-container">
+                    <span class="setting-label">Test Setting:</span>
+                    <select>
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                    </select>
+                </div>
+                <button id="apply-config">Apply Settings</button>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+            <h3>🧪 Test Instructions</h3>
+            <p>1. Click the settings button (⚙️) to toggle the configuration panel</p>
+            <p>2. Watch the debug info in the top-right corner</p>
+            <p>3. The panel should smoothly appear/disappear</p>
+            <p>4. The button should rotate and change color when active</p>
+        </div>
+    </div>
+
+    <script>
+        const configToggle = document.getElementById('config-toggle');
+        const configContainer = document.getElementById('config-container');
+        const applyConfigButton = document.getElementById('apply-config');
+
+        // Debug elements
+        const containerClasses = document.getElementById('container-classes');
+        const buttonClasses = document.getElementById('button-classes');
+        const visibility = document.getElementById('visibility');
+        const opacity = document.getElementById('opacity');
+        const maxHeight = document.getElementById('max-height');
+
+        function updateDebugInfo() {
+            const computedStyle = getComputedStyle(configContainer);
+            
+            containerClasses.textContent = configContainer.className;
+            buttonClasses.textContent = configToggle.className;
+            visibility.textContent = computedStyle.visibility;
+            opacity.textContent = computedStyle.opacity;
+            maxHeight.textContent = computedStyle.maxHeight;
+        }
+
+        // Handle configuration panel toggle
+        configToggle.addEventListener('click', () => {
+            console.log('🔧 Config toggle clicked!');
+            console.log('Before toggle - Container classes:', configContainer.className);
+            console.log('Before toggle - Button classes:', configToggle.className);
+            
+            configContainer.classList.toggle('hidden-mobile');
+            configToggle.classList.toggle('active');
+            
+            console.log('After toggle - Container classes:', configContainer.className);
+            console.log('After toggle - Button classes:', configToggle.className);
+            
+            updateDebugInfo();
+        });
+
+        // Handle apply button
+        applyConfigButton.addEventListener('click', () => {
+            console.log('✅ Apply config clicked!');
+            configContainer.classList.add('hidden-mobile');
+            configToggle.classList.remove('active');
+            updateDebugInfo();
+        });
+
+        // Initial debug info
+        updateDebugInfo();
+        
+        console.log('🚀 Simple toggle test loaded');
+        console.log('Initial container classes:', configContainer.className);
+        console.log('Initial button classes:', configToggle.className);
+    </script>
+</body>
+</html>
