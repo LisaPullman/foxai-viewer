@@ -70,6 +70,43 @@ const API_POOL_CONFIGS = [
     }
 ];
 
+// Mobile-friendly API Pool configurations (公网地址优先)
+const MOBILE_API_CONFIGS = [
+    // 移动端优先配置 - 使用公网地址和HTTPS
+    {
+        apiKey: 'F435261ox',
+        baseUrl: window.location.origin,  // 当前域名（支持HTTPS）
+        endpoint: '/api/v1/chat/completions'
+    },
+    {
+        apiKey: 'F435261ox',
+        baseUrl: window.location.origin,
+        endpoint: '/v1/chat/completions'
+    },
+    // 如果当前域名是Worker，尝试直接API Pool
+    {
+        apiKey: 'F435261ox',
+        baseUrl: 'http://10.20200108.xyz',
+        endpoint: '/v1/chat/completions'
+    }
+];
+
+// 检测是否为移动设备
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768;
+}
+
+// 检测网络环境
+function isLocalNetwork() {
+    const hostname = window.location.hostname;
+    return hostname === 'localhost' || 
+           hostname === '127.0.0.1' || 
+           hostname.startsWith('192.168.') || 
+           hostname.startsWith('10.') ||
+           hostname.endsWith('.local');
+}
+
 // Additional endpoint configurations for Gemini Balance
 const API_POOL_ENDPOINTS = [
     '/v1/chat/completions',      // Standard OpenAI format
@@ -405,6 +442,18 @@ async function connectToWebsocket() {
 async function connectToApiPool() {
     logMessage('Connecting to API Pool...', 'system', 'connecting');
 
+    // 检测设备类型和网络环境
+    const isMobile = isMobileDevice();
+    const isLocal = isLocalNetwork();
+    
+    if (isMobile) {
+        logMessage('📱 Mobile device detected - using optimized connection strategy', 'system');
+    }
+    
+    if (isLocal) {
+        logMessage('🏠 Local network detected', 'system');
+    }
+
     // Save values to localStorage
     localStorage.setItem('gemini_voice', voiceSelect.value);
     localStorage.setItem('gemini_language', languageSelect.value);
@@ -414,14 +463,22 @@ async function connectToApiPool() {
         let currentConfig = API_POOL_CONFIG;
         let connectionSuccessful = false;
 
+        // 根据设备类型选择配置策略
+        const configsToTry = isMobile ? 
+            [...MOBILE_API_CONFIGS, ...API_POOL_CONFIGS] : 
+            API_POOL_CONFIGS;
+
+        logMessage(`🔄 Testing ${configsToTry.length} configurations (${isMobile ? 'Mobile' : 'Desktop'} mode)...`, 'system');
+
         // Try different API Pool configurations for Gemini Balance compatibility
-        for (let i = 0; i < API_POOL_CONFIGS.length && !connectionSuccessful; i++) {
-            const config = API_POOL_CONFIGS[i];
+        for (let i = 0; i < configsToTry.length && !connectionSuccessful; i++) {
+            const config = configsToTry[i];
             try {
-                logMessage(`Testing API Pool: ${config.baseUrl}${config.endpoint}...`, 'system');
+                const configType = config.baseUrl === window.location.origin ? 'Proxy' : 'Direct';
+                logMessage(`Testing ${configType} API: ${config.baseUrl}${config.endpoint}...`, 'system');
 
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+                const timeoutId = setTimeout(() => controller.abort(), isMobile ? 10000 : 8000); // 移动端延长超时
 
                 // Try models endpoint first to test connectivity
                 const modelsEndpoint = config.endpoint.replace('/chat/completions', '/models');
@@ -438,7 +495,7 @@ async function connectToApiPool() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    logMessage(`✅ API Pool connected: ${config.baseUrl}${config.endpoint}`, 'system');
+                    logMessage(`✅ ${configType} API connected: ${config.baseUrl}${config.endpoint}`, 'system');
                     logMessage(`Found ${data.data?.length || data.models?.length || 0} models available`, 'system');
                     
                     // Update current config with working configuration
@@ -446,10 +503,11 @@ async function connectToApiPool() {
                     connectionSuccessful = true;
                     break;
                 } else {
-                    logMessage(`Config ${i+1} returned ${response.status}`, 'system');
+                    logMessage(`${configType} API returned ${response.status}`, 'system');
                 }
             } catch (configError) {
-                logMessage(`Config ${i+1} failed: ${configError.name}`, 'system');
+                const errorType = configError.name === 'AbortError' ? 'Timeout' : configError.name;
+                logMessage(`Config ${i+1} failed: ${errorType}`, 'system');
                 continue;
             }
         }
@@ -687,6 +745,7 @@ async function sendMessageToApiPool(message) {
     
     // Use the active config that was successfully connected
     const activeConfig = window.activeApiConfig || API_POOL_CONFIG;
+    const isMobile = isMobileDevice();
 
     // Handle demo mode
     if (activeConfig.baseUrl === 'demo') {
@@ -703,11 +762,12 @@ async function sendMessageToApiPool(message) {
         return;
     }
 
-    logMessage('🔄 Sending to API Pool...', 'system');
+    const configType = activeConfig.baseUrl === window.location.origin ? 'Proxy' : 'Direct';
+    logMessage(`🔄 Sending to ${configType} API${isMobile ? ' (Mobile)' : ''}...`, 'system');
 
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), isMobile ? 45000 : 30000); // 移动端延长超时
 
         const response = await fetch(`${activeConfig.baseUrl}${activeConfig.endpoint}`, {
             method: 'POST',
@@ -748,15 +808,28 @@ async function sendMessageToApiPool(message) {
         let errorMessage = 'Unknown error';
 
         if (error.name === 'AbortError') {
-            errorMessage = 'Request timeout - API Pool may be slow or unreachable';
-        } else if (error.message.includes('fetch')) {
-            errorMessage = 'Network error - Check connection to API Pool';
+            errorMessage = isMobile ? 
+                'Request timeout - Mobile network may be slow' : 
+                'Request timeout - API Pool may be slow or unreachable';
+        } else if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+            errorMessage = isMobile ? 
+                'Network error - Check mobile data/WiFi connection' : 
+                'Network error - Check connection to API Pool';
+        } else if (error.message.includes('TypeError')) {
+            errorMessage = isMobile ? 
+                'Connection failed - Switch to WiFi or retry' : 
+                'Network connectivity issue - Check internet connection';
         } else {
             errorMessage = error.message;
         }
 
         Logger.error('API Pool message error:', error);
         logMessage(`❌ Error: ${errorMessage}`, 'system');
+        
+        // 移动端特殊提示
+        if (isMobile) {
+            logMessage('💡 Mobile tip: Try switching between WiFi and mobile data', 'system');
+        }
     }
 }
 

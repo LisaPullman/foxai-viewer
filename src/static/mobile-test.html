@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>FoxAI 移动端连接测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            /* iOS Safari底部工具栏适配 */
+            padding-bottom: env(safe-area-inset-bottom);
+            /* 防止iOS双击缩放 */
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .mobile-test-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        .device-info {
+            background: #f0f8ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4285f4;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e0e0e0;
+        }
+
+        .test-section.success {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #f8fff8, #ffffff);
+        }
+
+        .test-section.error {
+            border-color: #f44336;
+            background: linear-gradient(135deg, #fff8f8, #ffffff);
+        }
+
+        .test-section.loading {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fffdf8, #ffffff);
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #4285f4, #1976d2);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 10px 5px;
+            width: 100%;
+            max-width: 300px;
+            /* 移动端触摸优化 */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            min-height: 48px;
+        }
+
+        .test-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+        }
+
+        .test-button:active {
+            transform: scale(0.95);
+        }
+
+        .test-button:disabled {
+            opacity: 0.6;
+            transform: none;
+        }
+
+        .result {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            /* 移动端滚动优化 */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-error { background: #f8d7da; color: #721c24; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+
+        .network-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4285f4;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .mobile-test-container {
+                padding: 20px 15px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .test-button {
+                font-size: 15px;
+                padding: 12px 20px;
+            }
+            
+            .network-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-test-container">
+        <h1>🦊 FoxAI 移动端连接测试</h1>
+        
+        <!-- 设备信息 -->
+        <div class="device-info">
+            <h3>📱 设备信息</h3>
+            <div id="device-details"></div>
+        </div>
+
+        <!-- 网络连接测试 -->
+        <div class="test-section" id="network-test">
+            <h3>🌐 网络连接测试</h3>
+            <button class="test-button" onclick="testNetworkConnection()">开始网络测试</button>
+            <div class="result" id="network-result"></div>
+        </div>
+
+        <!-- API Pool直连测试 -->
+        <div class="test-section" id="api-direct-test">
+            <h3>🔗 API Pool直连测试</h3>
+            <button class="test-button" onclick="testApiPoolDirect()">测试直连API Pool</button>
+            <div class="result" id="api-direct-result"></div>
+        </div>
+
+        <!-- API代理测试 -->
+        <div class="test-section" id="api-proxy-test">
+            <h3>🔄 API代理测试</h3>
+            <button class="test-button" onclick="testApiProxy()">测试代理连接</button>
+            <div class="result" id="api-proxy-result"></div>
+        </div>
+
+        <!-- 实际聊天测试 -->
+        <div class="test-section" id="chat-test">
+            <h3>💬 聊天功能测试</h3>
+            <button class="test-button" onclick="testChatFunction()">测试聊天功能</button>
+            <div class="result" id="chat-result"></div>
+        </div>
+
+        <!-- 性能统计 -->
+        <div class="test-section" id="performance-stats">
+            <h3>📊 性能统计</h3>
+            <div class="network-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="response-time">-</div>
+                    <div class="stat-label">响应时间 (ms)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="success-rate">-</div>
+                    <div class="stat-label">成功率 (%)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 性能统计
+        let testStats = {
+            totalTests: 0,
+            successfulTests: 0,
+            averageResponseTime: 0,
+            responseTimes: []
+        };
+
+        // 初始化设备信息
+        function initDeviceInfo() {
+            const deviceDetails = document.getElementById('device-details');
+            const userAgent = navigator.userAgent;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+            const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+            const isAndroid = /Android/.test(userAgent);
+            
+            deviceDetails.innerHTML = `
+                <span class="status-badge ${isMobile ? 'badge-success' : 'badge-info'}">${isMobile ? '移动设备' : '桌面设备'}</span>
+                ${isIOS ? '<span class="status-badge badge-info">iOS</span>' : ''}
+                ${isAndroid ? '<span class="status-badge badge-info">Android</span>' : ''}
+                <br><br>
+                <strong>屏幕尺寸:</strong> ${window.innerWidth} × ${window.innerHeight}<br>
+                <strong>网络连接:</strong> ${navigator.connection ? navigator.connection.effectiveType : '未知'}<br>
+                <strong>当前域名:</strong> ${window.location.host}<br>
+                <strong>协议:</strong> ${window.location.protocol}
+            `;
+        }
+
+        // 测试网络连接
+        async function testNetworkConnection() {
+            updateTestStatus('network-test', 'loading');
+            const resultDiv = document.getElementById('network-result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '正在测试网络连接...';
+
+            const startTime = Date.now();
+            
+            try {
+                // 测试到多个服务的连接
+                const tests = [
+                    { name: 'Google DNS', url: 'https://8.8.8.8' },
+                    { name: 'Cloudflare', url: 'https://1.1.1.1' },
+                    { name: 'Current Domain', url: window.location.origin }
+                ];
+
+                let results = [];
+                
+                for (const test of tests) {
+                    try {
+                        const testStart = Date.now();
+                        const response = await fetch(test.url, { 
+                            method: 'HEAD',
+                            mode: 'no-cors',
+                            cache: 'no-cache'
+                        });
+                        const testTime = Date.now() - testStart;
+                        results.push(`✅ ${test.name}: ${testTime}ms`);
+                    } catch (error) {
+                        results.push(`❌ ${test.name}: ${error.message}`);
+                    }
+                }
+
+                const totalTime = Date.now() - startTime;
+                updateStats(totalTime, true);
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `网络连接测试完成 (${totalTime}ms):\n\n${results.join('\n')}`;
+                updateTestStatus('network-test', 'success');
+                
+            } catch (error) {
+                const totalTime = Date.now() - startTime;
+                updateStats(totalTime, false);
+                
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `网络连接测试失败:\n${error.message}`;
+                updateTestStatus('network-test', 'error');
+            }
+        }
+
+        // 测试API Pool直连
+        async function testApiPoolDirect() {
+            updateTestStatus('api-direct-test', 'loading');
+            const resultDiv = document.getElementById('api-direct-result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '正在测试API Pool直连...';
+
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch('http://10.20200108.xyz/v1/models', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer F435261ox',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const totalTime = Date.now() - startTime;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStats(totalTime, true);
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ API Pool直连成功 (${totalTime}ms)\n\n可用模型数量: ${data.data?.length || data.models?.length || 0}`;
+                    updateTestStatus('api-direct-test', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                const totalTime = Date.now() - startTime;
+                updateStats(totalTime, false);
+                
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ API Pool直连失败 (${totalTime}ms):\n${error.message}\n\n这是正常的，移动端通常无法直接访问内网服务`;
+                updateTestStatus('api-direct-test', 'error');
+            }
+        }
+
+        // 测试API代理
+        async function testApiProxy() {
+            updateTestStatus('api-proxy-test', 'loading');
+            const resultDiv = document.getElementById('api-proxy-result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '正在测试API代理连接...';
+
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch(`${window.location.origin}/v1/models`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer F435261ox',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const totalTime = Date.now() - startTime;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStats(totalTime, true);
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ API代理连接成功 (${totalTime}ms)\n\n可用模型: ${data.data?.length || data.models?.length || 0}个\n代理地址: ${window.location.origin}/v1/models`;
+                    updateTestStatus('api-proxy-test', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                const totalTime = Date.now() - startTime;
+                updateStats(totalTime, false);
+                
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ API代理连接失败 (${totalTime}ms):\n${error.message}`;
+                updateTestStatus('api-proxy-test', 'error');
+            }
+        }
+
+        // 测试聊天功能
+        async function testChatFunction() {
+            updateTestStatus('chat-test', 'loading');
+            const resultDiv = document.getElementById('chat-result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '正在测试聊天功能...';
+
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch(`${window.location.origin}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer F435261ox',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'gemini-2.0-flash-exp',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: 'Hello, this is a mobile connection test for FoxAI. Please respond briefly.'
+                            }
+                        ],
+                        stream: false,
+                        max_tokens: 100
+                    })
+                });
+
+                const totalTime = Date.now() - startTime;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const aiResponse = data.choices?.[0]?.message?.content || 'No response';
+                    updateStats(totalTime, true);
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ 聊天功能测试成功 (${totalTime}ms)\n\nAI回复:\n${aiResponse}`;
+                    updateTestStatus('chat-test', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                const totalTime = Date.now() - startTime;
+                updateStats(totalTime, false);
+                
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ 聊天功能测试失败 (${totalTime}ms):\n${error.message}`;
+                updateTestStatus('chat-test', 'error');
+            }
+        }
+
+        // 更新测试状态
+        function updateTestStatus(sectionId, status) {
+            const section = document.getElementById(sectionId);
+            section.className = `test-section ${status}`;
+        }
+
+        // 更新统计信息
+        function updateStats(responseTime, success) {
+            testStats.totalTests++;
+            testStats.responseTimes.push(responseTime);
+            
+            if (success) {
+                testStats.successfulTests++;
+            }
+            
+            // 计算平均响应时间
+            testStats.averageResponseTime = Math.round(
+                testStats.responseTimes.reduce((a, b) => a + b, 0) / testStats.responseTimes.length
+            );
+            
+            // 计算成功率
+            const successRate = Math.round((testStats.successfulTests / testStats.totalTests) * 100);
+            
+            // 更新显示
+            document.getElementById('response-time').textContent = testStats.averageResponseTime;
+            document.getElementById('success-rate').textContent = successRate;
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initDeviceInfo();
+        });
+    </script>
+</body>
+</html> 

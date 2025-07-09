@@ -6,6 +6,18 @@ import { Buffer } from "node:buffer";
 
 export default {
   async fetch (request) {
+    // Handle CORS preflight requests first
+    const corsResponse = handleCORS(request);
+    if (corsResponse) {
+      return corsResponse;
+    }
+    
+    // Handle API proxy requests for mobile compatibility
+    const proxyResponse = await handleApiProxy(request);
+    if (proxyResponse) {
+      return proxyResponse;
+    }
+    
     if (request.method === "OPTIONS") {
       return handleOPTIONS();
     }
@@ -512,4 +524,120 @@ async function toOpenAiStreamFlush (controller) {
     }
     controller.enqueue("data: [DONE]" + delimiter);
   }
+}
+
+// API Pool proxy configuration for mobile compatibility
+const API_POOL_PROXY_CONFIG = {
+    apiKey: 'F435261ox',
+    baseUrl: 'http://10.20200108.xyz',
+    allowedEndpoints: [
+        '/v1/chat/completions',
+        '/v1/models',
+        '/openai/v1/chat/completions',
+        '/hf/v1/chat/completions'
+    ]
+};
+
+// Handle API proxy requests for mobile devices
+async function handleApiProxy(request, env) {
+    const url = new URL(request.url);
+    const endpoint = url.pathname;
+    
+    // Check if this is an API proxy request
+    if (endpoint.startsWith('/api/') || endpoint.startsWith('/v1/') || 
+        endpoint.startsWith('/openai/') || endpoint.startsWith('/hf/')) {
+        
+        // Remove /api prefix if present
+        const targetEndpoint = endpoint.startsWith('/api') ? 
+            endpoint.substring(4) : endpoint;
+        
+        // Verify endpoint is allowed
+        if (!API_POOL_PROXY_CONFIG.allowedEndpoints.includes(targetEndpoint)) {
+            return new Response(JSON.stringify({ 
+                error: 'Endpoint not allowed',
+                endpoint: targetEndpoint 
+            }), {
+                status: 403,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+        
+        try {
+            // Forward request to API Pool
+            const proxyUrl = `${API_POOL_PROXY_CONFIG.baseUrl}${targetEndpoint}`;
+            
+            // Get request body if present
+            let body = null;
+            if (request.method !== 'GET') {
+                body = await request.text();
+            }
+            
+            // Create headers
+            const headers = {
+                'Authorization': `Bearer ${API_POOL_PROXY_CONFIG.apiKey}`,
+                'Content-Type': 'application/json',
+                'User-Agent': 'FoxAI-Mobile-Proxy/1.0'
+            };
+            
+            // Forward request
+            const response = await fetch(proxyUrl, {
+                method: request.method,
+                headers: headers,
+                body: body
+            });
+            
+            // Get response data
+            const responseData = await response.text();
+            
+            // Create CORS-enabled response
+            return new Response(responseData, {
+                status: response.status,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            
+        } catch (error) {
+            return new Response(JSON.stringify({ 
+                error: 'API Proxy Error',
+                message: error.message,
+                endpoint: targetEndpoint 
+            }), {
+                status: 500,
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            });
+        }
+    }
+    
+    return null; // Not an API proxy request
+}
+
+// Handle CORS preflight requests
+function handleCORS(request) {
+    const url = new URL(request.url);
+    const endpoint = url.pathname;
+    
+    if (request.method === 'OPTIONS' && 
+        (endpoint.startsWith('/api/') || endpoint.startsWith('/v1/') || 
+         endpoint.startsWith('/openai/') || endpoint.startsWith('/hf/'))) {
+        
+        return new Response(null, {
+            status: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Max-Age': '86400'
+            }
+        });
+    }
+    
+    return null;
 }
