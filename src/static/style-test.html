@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoxAI Style Test - MCP & Settings</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- FoxAI Brand Header -->
+        <div class="foxai-header">
+            <div class="foxai-logo">
+                <div class="foxai-icon">🦊</div>
+                <div class="foxai-text">
+                    <span class="foxai-brand">FoxAI</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings">
+            <div class="connection-mode">
+                <label for="connection-mode-select">Connection Mode:</label>
+                <select id="connection-mode-select">
+                    <option value="api-pool">🔗 API Pool (Text Only)</option>
+                    <option value="websocket">🎤 WebSocket (Full Features)</option>
+                </select>
+            </div>
+            <div id="api-pool-info" class="api-pool-info">
+                <span class="api-pool-status" id="api-pool-status">🔗 API Pool Ready</span>
+                <span class="api-pool-endpoint" id="api-pool-endpoint">Private API Service</span>
+                <span class="api-pool-key" id="api-pool-key">🔐 Authenticated</span>
+                <div class="api-pool-features">
+                    <span class="feature-tag">✅ Text Chat</span>
+                    <span class="feature-tag upgrade">🔄 Voice (Click to Enable)</span>
+                    <span class="feature-tag upgrade">🔄 Video (Click to Enable)</span>
+                </div>
+            </div>
+            <div class="settings-buttons">
+                <button id="config-toggle" class="icon-button material-symbols-outlined" title="Settings">settings</button>
+                <button id="mcp-tools-btn" class="icon-button material-symbols-outlined" title="MCP Tools Manager">extension</button>
+            </div>
+        </div>
+
+        <!-- Configuration Container -->
+        <div id="config-container">
+            <div class="config-wrapper">
+                <div class="setting-container">
+                    <span class="setting-label">UI Language: </span>
+                    <select id="ui-language-select">
+                        <option value="en">English</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label">Voice Language: </span>
+                    <select id="language-select">
+                        <option value="en">English</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label">Sound: </span>
+                    <select id="voice-select">
+                        <option value="Puck">Puck (Male)</option>
+                        <option value="Charon">Charon (Male)</option>
+                        <option value="Fenrir">Fenrir (Male)</option>
+                        <option value="Kore">Kore (Female)</option>
+                        <option value="Aoede" selected>Aoede (Female)</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label">Response Type: </span>
+                    <select id="response-type-select">
+                        <option value="text">Text</option>
+                        <option value="audio" selected>Audio</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label">Video FPS: </span>
+                    <input type="number" id="fps-input" placeholder="Video FPS" value="1" min="1" max="30" step="1"/>
+                    <span class="fps-help">Higher FPS need more network bandwidth</span>
+                </div>
+                <textarea id="system-instruction" placeholder="Enter custom system instructions..." rows="6">You are my helpful assistant. You can see and hear me, and respond with voice and text.</textarea>
+                <button id="apply-config">✅ Confirm Settings</button>
+            </div>
+        </div>
+
+        <!-- Test MCP Modal -->
+        <div class="mcp-tool-manager" id="test-mcp-modal">
+            <div class="mcp-overlay">
+                <div class="mcp-modal">
+                    <div class="mcp-header">
+                        <h2>🔧 MCP Tool Manager</h2>
+                        <button class="mcp-close">×</button>
+                    </div>
+                    
+                    <div class="mcp-tabs">
+                        <button class="mcp-tab active" data-tab="tools">Tools</button>
+                        <button class="mcp-tab" data-tab="categories">Categories</button>
+                        <button class="mcp-tab" data-tab="settings">Settings</button>
+                    </div>
+                    
+                    <div class="mcp-content">
+                        <div class="mcp-tab-content active">
+                            <!-- Statistics -->
+                            <div class="mcp-stats">
+                                <div class="mcp-stat">
+                                    <span class="mcp-stat-value">12</span>
+                                    <span class="mcp-stat-label">Total Tools</span>
+                                </div>
+                                <div class="mcp-stat">
+                                    <span class="mcp-stat-value">8</span>
+                                    <span class="mcp-stat-label">Enabled</span>
+                                </div>
+                                <div class="mcp-stat">
+                                    <span class="mcp-stat-value">4</span>
+                                    <span class="mcp-stat-label">Disabled</span>
+                                </div>
+                                <div class="mcp-stat">
+                                    <span class="mcp-stat-value">5</span>
+                                    <span class="mcp-stat-label">Categories</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tools List -->
+                            <div class="mcp-tools-list">
+                                <div class="mcp-tool-item enabled">
+                                    <div class="mcp-tool-icon" style="color: #4285f4">🔍</div>
+                                    <div class="mcp-tool-info">
+                                        <h4>Google Search</h4>
+                                        <p>Search the web for information using Google's search API</p>
+                                        <span class="mcp-tool-category">Search</span>
+                                        <span class="mcp-tool-badge">Server-side</span>
+                                    </div>
+                                    <div class="mcp-tool-controls">
+                                        <label class="mcp-toggle">
+                                            <input type="checkbox" checked>
+                                            <span class="mcp-toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mcp-tool-item disabled">
+                                    <div class="mcp-tool-icon" style="color: #ff9800">🧮</div>
+                                    <div class="mcp-tool-info">
+                                        <h4>Calculator</h4>
+                                        <p>Perform mathematical calculations and computations</p>
+                                        <span class="mcp-tool-category">Utility</span>
+                                        <span class="mcp-tool-badge">Client-side</span>
+                                    </div>
+                                    <div class="mcp-tool-controls">
+                                        <label class="mcp-toggle">
+                                            <input type="checkbox">
+                                            <span class="mcp-toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple test interactions
+        document.getElementById('config-toggle').addEventListener('click', () => {
+            const container = document.getElementById('config-container');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('mcp-tools-btn').addEventListener('click', () => {
+            const modal = document.getElementById('test-mcp-modal');
+            modal.classList.toggle('hidden');
+        });
+
+        document.querySelector('.mcp-close').addEventListener('click', () => {
+            const modal = document.getElementById('test-mcp-modal');
+            modal.classList.add('hidden');
+        });
+
+        document.querySelector('.mcp-overlay').addEventListener('click', (e) => {
+            if (e.target.classList.contains('mcp-overlay')) {
+                const modal = document.getElementById('test-mcp-modal');
+                modal.classList.add('hidden');
+            }
+        });
+
+        // Initially hide the modal
+        document.getElementById('test-mcp-modal').classList.add('hidden');
+    </script>
+</body>
+</html>

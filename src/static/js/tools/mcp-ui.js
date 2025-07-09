@@ -55,16 +55,74 @@ export class MCPToolUI {
                         </div>
                         
                         <div class="mcp-tab-content" id="mcp-settings-tab">
-                            <div class="mcp-settings-panel">
-                                <h3>Import/Export</h3>
-                                <div class="mcp-import-export">
-                                    <button id="mcp-export-btn" class="mcp-btn">Export Config</button>
-                                    <input type="file" id="mcp-import-file" accept=".json" style="display: none;">
-                                    <button id="mcp-import-btn" class="mcp-btn">Import Config</button>
+                            <div class="mcp-settings-section">
+                                <h3>🔧 Tool Configuration</h3>
+                                <div class="mcp-settings-grid">
+                                    <div class="mcp-setting-item">
+                                        <label class="mcp-setting-label">Auto-enable new tools</label>
+                                        <p class="mcp-setting-description">Automatically enable newly discovered MCP tools</p>
+                                        <div class="mcp-setting-control">
+                                            <label class="mcp-toggle">
+                                                <input type="checkbox" id="mcp-auto-enable" checked>
+                                                <span class="mcp-toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mcp-setting-item">
+                                        <label class="mcp-setting-label">Tool timeout</label>
+                                        <p class="mcp-setting-description">Maximum time to wait for tool responses (seconds)</p>
+                                        <div class="mcp-setting-control">
+                                            <input type="number" id="mcp-timeout" class="mcp-setting-input" value="30" min="5" max="300">
+                                        </div>
+                                    </div>
+                                    <div class="mcp-setting-item">
+                                        <label class="mcp-setting-label">Debug mode</label>
+                                        <p class="mcp-setting-description">Enable detailed logging for MCP operations</p>
+                                        <div class="mcp-setting-control">
+                                            <label class="mcp-toggle">
+                                                <input type="checkbox" id="mcp-debug-mode">
+                                                <span class="mcp-toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mcp-setting-item">
+                                        <label class="mcp-setting-label">Tool priority</label>
+                                        <p class="mcp-setting-description">Default priority for new tools</p>
+                                        <div class="mcp-setting-control">
+                                            <select id="mcp-default-priority" class="mcp-setting-select">
+                                                <option value="low">Low</option>
+                                                <option value="normal" selected>Normal</option>
+                                                <option value="high">High</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                
-                                <h3>Reset</h3>
-                                <button id="mcp-reset-btn" class="mcp-btn mcp-btn-danger">Reset to Defaults</button>
+                            </div>
+
+                            <div class="mcp-settings-section">
+                                <h3>📁 Import/Export</h3>
+                                <div class="mcp-settings-grid">
+                                    <div class="mcp-setting-item">
+                                        <label class="mcp-setting-label">Export Configuration</label>
+                                        <p class="mcp-setting-description">Download current MCP tool configuration as JSON</p>
+                                        <div class="mcp-setting-control">
+                                            <button id="mcp-export-btn" class="mcp-btn">📤 Export Config</button>
+                                        </div>
+                                    </div>
+                                    <div class="mcp-setting-item">
+                                        <label class="mcp-setting-label">Import Configuration</label>
+                                        <p class="mcp-setting-description">Upload and apply MCP tool configuration from JSON file</p>
+                                        <div class="mcp-setting-control">
+                                            <input type="file" id="mcp-import-file" accept=".json" style="display: none;">
+                                            <button id="mcp-import-btn" class="mcp-btn">📥 Import Config</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mcp-actions">
+                                <button id="mcp-save-btn" class="mcp-btn primary">💾 Save Settings</button>
+                                <button id="mcp-reset-btn" class="mcp-btn danger">🔄 Reset to Defaults</button>
                             </div>
                         </div>
                     </div>
@@ -104,6 +162,10 @@ export class MCPToolUI {
             this.importConfig(e.target.files[0]);
         });
 
+        document.getElementById('mcp-save-btn').addEventListener('click', () => {
+            this.saveSettings();
+        });
+
         document.getElementById('mcp-reset-btn').addEventListener('click', () => {
             this.resetToDefaults();
         });
@@ -123,6 +185,7 @@ export class MCPToolUI {
         this.isVisible = true;
         this.container.classList.remove('hidden');
         this.refreshContent();
+        this.loadSettings();
         document.body.style.overflow = 'hidden';
     }
 
@@ -269,9 +332,9 @@ export class MCPToolUI {
             const info = categoryInfo[category] || { icon: '📦', name: category };
             return `
                 <div class="mcp-category-card">
-                    <div class="mcp-category-icon">${info.icon}</div>
-                    <h3>${info.name}</h3>
-                    <p>${count} tool${count !== 1 ? 's' : ''}</p>
+                    <span class="mcp-category-icon">${info.icon}</span>
+                    <div class="mcp-category-name">${info.name}</div>
+                    <div class="mcp-category-count">${count} tool${count !== 1 ? 's' : ''}</div>
                 </div>
             `;
         }).join('');
@@ -333,6 +396,60 @@ export class MCPToolUI {
         } catch (error) {
             Logger.error('Failed to import config', error);
             alert(`Failed to import config: ${error.message}`);
+        }
+    }
+
+    /**
+     * Save current settings
+     */
+    saveSettings() {
+        try {
+            const autoEnable = document.getElementById('mcp-auto-enable').checked;
+            const timeout = parseInt(document.getElementById('mcp-timeout').value);
+            const debugMode = document.getElementById('mcp-debug-mode').checked;
+            const defaultPriority = document.getElementById('mcp-default-priority').value;
+
+            // Save settings to localStorage or config
+            const settings = {
+                autoEnable,
+                timeout,
+                debugMode,
+                defaultPriority
+            };
+
+            localStorage.setItem('mcp-settings', JSON.stringify(settings));
+            Logger.info('MCP settings saved', settings);
+            alert('Settings saved successfully!');
+        } catch (error) {
+            Logger.error('Failed to save settings', error);
+            alert(`Failed to save settings: ${error.message}`);
+        }
+    }
+
+    /**
+     * Load saved settings
+     */
+    loadSettings() {
+        try {
+            const savedSettings = localStorage.getItem('mcp-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+
+                if (document.getElementById('mcp-auto-enable')) {
+                    document.getElementById('mcp-auto-enable').checked = settings.autoEnable ?? true;
+                }
+                if (document.getElementById('mcp-timeout')) {
+                    document.getElementById('mcp-timeout').value = settings.timeout ?? 30;
+                }
+                if (document.getElementById('mcp-debug-mode')) {
+                    document.getElementById('mcp-debug-mode').checked = settings.debugMode ?? false;
+                }
+                if (document.getElementById('mcp-default-priority')) {
+                    document.getElementById('mcp-default-priority').value = settings.defaultPriority ?? 'normal';
+                }
+            }
+        } catch (error) {
+            Logger.error('Failed to load settings', error);
         }
     }
 

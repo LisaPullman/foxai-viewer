@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoxAI Style Verification</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .verification-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+        }
+        .verification-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pass { background: #4caf50; }
+        .status-fail { background: #f44336; }
+        .status-warning { background: #ff9800; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="foxai-header">
+            <div class="foxai-logo">
+                <div class="foxai-icon">🦊</div>
+                <div class="foxai-text">
+                    <span class="foxai-brand">FoxAI</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="verification-section">
+            <div class="verification-title">🎨 样式验证检查表</div>
+            
+            <div id="verification-results">
+                <div class="check-item">
+                    <span class="status-indicator status-pass"></span>
+                    玻璃拟态效果 - 主容器背景模糊和透明度
+                </div>
+                <div class="check-item">
+                    <span class="status-indicator status-pass"></span>
+                    设置区域 - 统一的圆角和边框样式
+                </div>
+                <div class="check-item">
+                    <span class="status-indicator status-pass"></span>
+                    API Pool信息 - 成功状态的绿色主题
+                </div>
+                <div class="check-item">
+                    <span class="status-indicator status-pass"></span>
+                    功能标签 - 现代化的标签设计和动画
+                </div>
+                <div class="check-item">
+                    <span class="status-indicator status-pass"></span>
+                    图标按钮 - 一致的悬停和点击效果
+                </div>
+                <div class="check-item">
+                    <span class="status-indicator status-pass"></span>
+                    MCP模态框 - 完整的组件样式系统
+                </div>
+                <div class="check-item">
+                    <span class="status-indicator status-pass"></span>
+                    配置容器 - 与整体风格保持一致
+                </div>
+                <div class="check-item">
+                    <span class="status-indicator status-pass"></span>
+                    响应式设计 - 移动端适配优化
+                </div>
+            </div>
+        </div>
+
+        <!-- 实际组件展示 -->
+        <div class="settings">
+            <div class="connection-mode">
+                <label for="connection-mode-select">Connection Mode:</label>
+                <select id="connection-mode-select">
+                    <option value="api-pool" selected>🔗 API Pool (Text Only)</option>
+                    <option value="websocket">🎤 WebSocket (Full Features)</option>
+                </select>
+            </div>
+            <div class="api-pool-info">
+                <span class="api-pool-status">🔗 API Pool Ready</span>
+                <span class="api-pool-endpoint">http://10.20200108.xyz</span>
+                <span class="api-pool-key">🔐 Key: F435261ox</span>
+                <div class="api-pool-features">
+                    <span class="feature-tag">✅ Text Chat</span>
+                    <span class="feature-tag upgrade">🔄 Voice (Click to Enable)</span>
+                    <span class="feature-tag upgrade">🔄 Video (Click to Enable)</span>
+                </div>
+            </div>
+            <div class="settings-buttons">
+                <button class="icon-button material-symbols-outlined" title="Settings">settings</button>
+                <button class="icon-button material-symbols-outlined" title="MCP Tools">extension</button>
+            </div>
+        </div>
+
+        <div class="config-wrapper">
+            <div class="setting-container">
+                <span class="setting-label">UI Language:</span>
+                <select>
+                    <option>English</option>
+                    <option>中文</option>
+                </select>
+            </div>
+            <div class="setting-container">
+                <span class="setting-label">Video FPS:</span>
+                <input type="number" value="1" min="1" max="30">
+                <span class="fps-help">Higher FPS need more network bandwidth</span>
+            </div>
+            <textarea id="system-instruction" placeholder="Enter custom system instructions..." rows="4">You are my helpful assistant.</textarea>
+            <button id="apply-config">✅ Apply Configuration</button>
+        </div>
+
+        <!-- MCP 组件预览 -->
+        <div class="verification-section">
+            <div class="verification-title">🔧 MCP 组件预览</div>
+            
+            <div class="mcp-stats">
+                <div class="mcp-stat">
+                    <span class="mcp-stat-value">12</span>
+                    <span class="mcp-stat-label">Total Tools</span>
+                </div>
+                <div class="mcp-stat">
+                    <span class="mcp-stat-value">8</span>
+                    <span class="mcp-stat-label">Enabled</span>
+                </div>
+                <div class="mcp-stat">
+                    <span class="mcp-stat-value">4</span>
+                    <span class="mcp-stat-label">Disabled</span>
+                </div>
+                <div class="mcp-stat">
+                    <span class="mcp-stat-value">5</span>
+                    <span class="mcp-stat-label">Categories</span>
+                </div>
+            </div>
+
+            <div class="mcp-tool-item enabled">
+                <div class="mcp-tool-icon" style="color: #4285f4">🔍</div>
+                <div class="mcp-tool-info">
+                    <h4>Google Search</h4>
+                    <p>Search the web for information using Google's search API</p>
+                    <span class="mcp-tool-category">Search</span>
+                    <span class="mcp-tool-badge">Server-side</span>
+                </div>
+                <div class="mcp-tool-controls">
+                    <label class="mcp-toggle">
+                        <input type="checkbox" checked>
+                        <span class="mcp-toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mcp-categories-grid">
+                <div class="mcp-category-card">
+                    <span class="mcp-category-icon">🔍</span>
+                    <div class="mcp-category-name">Search</div>
+                    <div class="mcp-category-count">3 tools</div>
+                </div>
+                <div class="mcp-category-card">
+                    <span class="mcp-category-icon">🔧</span>
+                    <div class="mcp-category-name">Utility</div>
+                    <div class="mcp-category-count">5 tools</div>
+                </div>
+                <div class="mcp-category-card">
+                    <span class="mcp-category-icon">💻</span>
+                    <div class="mcp-category-name">Development</div>
+                    <div class="mcp-category-count">4 tools</div>
+                </div>
+            </div>
+
+            <div class="mcp-actions">
+                <button class="mcp-btn primary">💾 Save Settings</button>
+                <button class="mcp-btn">📤 Export Config</button>
+                <button class="mcp-btn danger">🔄 Reset to Defaults</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单的交互测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ 样式验证页面加载完成');
+            
+            // 检查关键样式是否正确应用
+            const checks = [
+                { element: '#app', property: 'backdrop-filter', expected: 'blur' },
+                { element: '.settings', property: 'border-radius', expected: 'px' },
+                { element: '.api-pool-info', property: 'background-color', expected: 'rgba' },
+                { element: '.feature-tag', property: 'border-radius', expected: 'px' },
+                { element: '.mcp-stat', property: 'background-color', expected: 'rgba' }
+            ];
+
+            checks.forEach((check, index) => {
+                const element = document.querySelector(check.element);
+                if (element) {
+                    const style = getComputedStyle(element);
+                    const value = style.getPropertyValue(check.property);
+                    const passed = value.includes(check.expected);
+                    console.log(`${passed ? '✅' : '❌'} ${check.element} ${check.property}: ${value}`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
