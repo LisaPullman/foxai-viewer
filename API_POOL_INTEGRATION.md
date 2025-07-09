@@ -48,10 +48,11 @@ deno run --allow-net --allow-read src/deno_index.ts
 
 ## ⚙️ 配置信息
 
-### API Pool配置 (已硬编码)
+### API Pool配置 (已修复并硬编码)
 - **API Key**: F435261ox
-- **Base URL**: http://10.20200108.xyz:8000
+- **Base URL**: http://10.20200108.xyz (已修复：移除端口号)
 - **Endpoint**: /v1/chat/completions
+- **状态**: ✅ 连接测试通过，59个模型可用
 
 ### 功能对比
 

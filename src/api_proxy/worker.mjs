@@ -68,8 +68,8 @@ const handleOPTIONS = async () => {
   });
 };
 
-// Use gemini-balance API pool with fallback
-const PRIMARY_BASE_URL = "http://10.20200108.xyz";
+// Use gemini-balance API pool with fallback - 修复为正确的工作配置
+const PRIMARY_BASE_URL = "http://10.20200108.xyz";  // 测试确认：无端口号配置工作正常
 const FALLBACK_BASE_URL = "https://foxai-viewer.deno.dev";
 const API_VERSION = "v1";
 
@@ -81,14 +81,20 @@ const makeHeaders = (apiKey, more) => ({
   ...more
 });
 
-// Try multiple API endpoints with fallback
+// Try multiple API endpoints with fallback (按测试结果重新排序)
 async function tryFetch(endpoint, options) {
   // Gemini Balance API endpoints to try
   const apiConfigs = [
+    // 1. 已验证工作的配置 (测试成功)
     { baseUrl: "http://10.20200108.xyz", endpoint: endpoint },
-    { baseUrl: "http://10.20200108.xyz:8000", endpoint: endpoint },
+    // 2. 备用端点尝试
+    { baseUrl: "http://10.20200108.xyz", endpoint: endpoint.replace('/v1/', '/openai/v1/') },
     { baseUrl: "http://10.20200108.xyz", endpoint: endpoint.replace('/v1/', '/hf/v1/') },
+    // 3. 带端口号的配置 (测试显示超时，但保留作为备用)
+    { baseUrl: "http://10.20200108.xyz:8000", endpoint: endpoint },
+    { baseUrl: "http://10.20200108.xyz:8000", endpoint: endpoint.replace('/v1/', '/openai/v1/') },
     { baseUrl: "http://10.20200108.xyz:8000", endpoint: endpoint.replace('/v1/', '/hf/v1/') },
+    // 4. 备用服务器
     { baseUrl: FALLBACK_BASE_URL, endpoint: endpoint }
   ];
   
@@ -183,7 +189,7 @@ async function handleEmbeddings (req, apiKey) {
   return new Response(body, fixCors(response));
 }
 
-const DEFAULT_MODEL = "gemini-1.5-pro-latest";
+const DEFAULT_MODEL = "gemini-2.0-flash-exp";
 async function handleCompletions (req, apiKey) {
   let model = DEFAULT_MODEL;
   switch(true) {
@@ -195,6 +201,12 @@ async function handleCompletions (req, apiKey) {
     case req.model.startsWith("gemini-"):
     case req.model.startsWith("learnlm-"):
       model = req.model;
+      break;
+    default:
+      // 如果是其他模型名称，尝试映射到gemini-balance支持的模型
+      if (req.model.includes("gpt") || req.model.includes("claude")) {
+        model = "gemini-2.0-flash-exp";
+      }
   }
   // Use OpenAI-compatible chat completions endpoint for gemini-balance
   const response = await tryFetch(`/${API_VERSION}/chat/completions`, {

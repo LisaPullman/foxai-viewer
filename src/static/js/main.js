@@ -31,20 +31,33 @@ const screenIcon = document.getElementById('screen-icon');
 const screenContainer = document.getElementById('screen-container');
 const screenPreview = document.getElementById('screen-preview');
 const inputAudioVisualizer = document.getElementById('input-audio-visualizer');
-// API Pool configuration - hardcoded (根据您的截图确认)
+// API Pool configuration - 修复为正确的工作配置
 const API_POOL_CONFIG = {
     apiKey: 'F435261ox',
-    baseUrl: 'http://10.20200108.xyz',  // 不使用端口号
+    baseUrl: 'http://10.20200108.xyz',  // 测试确认：无端口号配置工作正常
     endpoint: '/v1/chat/completions'
 };
 
-// Additional API Pool configurations to try
+// Additional API Pool configurations to try (按测试结果重新排序)
 const API_POOL_CONFIGS = [
+    // 1. 已验证工作的配置 (测试成功)
     {
         apiKey: 'F435261ox',
         baseUrl: 'http://10.20200108.xyz',
         endpoint: '/v1/chat/completions'
     },
+    // 2. 备用端点尝试
+    {
+        apiKey: 'F435261ox',
+        baseUrl: 'http://10.20200108.xyz',
+        endpoint: '/openai/v1/chat/completions'
+    },
+    {
+        apiKey: 'F435261ox',
+        baseUrl: 'http://10.20200108.xyz',
+        endpoint: '/hf/v1/chat/completions'
+    },
+    // 3. 带端口号的配置 (测试显示超时，但保留作为备用)
     {
         apiKey: 'F435261ox',
         baseUrl: 'http://10.20200108.xyz:8000',
@@ -52,13 +65,8 @@ const API_POOL_CONFIGS = [
     },
     {
         apiKey: 'F435261ox',
-        baseUrl: 'http://10.20200108.xyz',
-        endpoint: '/hf/v1/chat/completions'
-    },
-    {
-        apiKey: 'F435261ox',
         baseUrl: 'http://10.20200108.xyz:8000',
-        endpoint: '/hf/v1/chat/completions'
+        endpoint: '/openai/v1/chat/completions'
     }
 ];
 
@@ -708,7 +716,7 @@ async function sendMessageToApiPool(message) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gemini-1.5-pro',  // Use a more stable model for Gemini Balance
+                model: 'gemini-2.0-flash-exp',  // 使用gemini-balance支持的模型
                 messages: [
                     {
                         role: 'system',
