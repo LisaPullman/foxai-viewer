@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FoxAI Mobile Optimization Test - 移动端优化验证</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 11px;
+            z-index: 9999;
+            max-width: 150px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 107, 53, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+        .test-title {
+            font-weight: bold;
+            color: var(--foxai-orange);
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .touch-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .touch-button {
+            min-height: 44px;
+            background: var(--foxai-gradient);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .touch-button:active {
+            transform: scale(0.95);
+            background: var(--foxai-gradient-hover);
+        }
+        .device-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        .gesture-area {
+            height: 120px; 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border: 2px dashed rgba(255, 107, 53, 0.3);
+            margin: 10px 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info" id="test-info">
+        <div>Screen: <span id="screen-size"></span></div>
+        <div>Viewport: <span id="viewport-size"></span></div>
+        <div>DPR: <span id="device-pixel-ratio"></span></div>
+        <div>Touch: <span id="touch-support"></span></div>
+        <div>Orientation: <span id="orientation"></span></div>
+    </div>
+
+    <div id="app">
+        <!-- FoxAI Brand Header -->
+        <div class="foxai-header">
+            <div class="foxai-logo">
+                <div class="foxai-icon">🦊</div>
+                <div class="foxai-text">
+                    <span class="foxai-brand">FoxAI</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Section -->
+        <div class="test-section">
+            <div class="test-title">📱 移动端优化测试</div>
+            <div class="device-info" id="device-info">
+                <div><strong>用户代理:</strong> <span id="user-agent"></span></div>
+                <div><strong>平台:</strong> <span id="platform"></span></div>
+                <div><strong>语言:</strong> <span id="language"></span></div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings">
+            <div class="connection-mode">
+                <label for="connection-mode-select">Connection Mode:</label>
+                <select id="connection-mode-select">
+                    <option value="api-pool" selected>🔗 API Pool (Text Only)</option>
+                    <option value="websocket">🎤 WebSocket (Full Features)</option>
+                </select>
+            </div>
+            
+            <div class="api-pool-info">
+                <span class="api-pool-status">🔗 API Pool Ready</span>
+                <span class="api-pool-endpoint">http://10.20200108.xyz</span>
+                <span class="api-pool-key">🔐 Key: F435261ox</span>
+                <div class="api-pool-features">
+                    <span class="feature-tag">✅ Text Chat</span>
+                    <span class="feature-tag upgrade">🔄 Voice (Click to Enable)</span>
+                    <span class="feature-tag upgrade">🔄 Video (Click to Enable)</span>
+                </div>
+            </div>
+            
+            <div class="settings-buttons">
+                <button id="config-toggle" class="icon-button material-symbols-outlined" title="Settings">settings</button>
+                <button id="mcp-tools-btn" class="icon-button material-symbols-outlined" title="MCP Tools Manager">extension</button>
+            </div>
+        </div>
+
+        <!-- Touch Test Section -->
+        <div class="test-section">
+            <div class="test-title">👆 触摸目标测试</div>
+            <div class="touch-test">
+                <button class="touch-button" onclick="testTouch(this, '44px')">44px 最小</button>
+                <button class="touch-button" onclick="testTouch(this, '48px')">48px 舒适</button>
+                <button class="touch-button" onclick="testTouch(this, '56px')">56px 大型</button>
+                <button class="touch-button" onclick="testTouch(this, '64px')">64px 超大</button>
+            </div>
+            <div id="touch-feedback" style="margin-top: 10px; font-size: 14px; color: var(--foxai-orange);"></div>
+        </div>
+
+        <!-- Performance Test Section -->
+        <div class="test-section">
+            <div class="test-title">⚡ 性能测试</div>
+            <button class="touch-button" onclick="performanceTest()" style="width: 100%; margin: 5px 0;">运行性能测试</button>
+            <div id="performance-results" style="margin-top: 10px; font-size: 12px;"></div>
+        </div>
+
+        <!-- Gesture Test Section -->
+        <div class="test-section">
+            <div class="test-title">🤏 手势测试</div>
+            <div id="gesture-area" class="gesture-area">
+                在此区域进行触摸、滑动、双击测试
+            </div>
+            <div id="gesture-feedback" style="font-size: 12px; color: var(--foxai-orange);"></div>
+        </div>
+
+        <!-- Viewport Test Section -->
+        <div class="test-section">
+            <div class="test-title">📐 视口测试</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+                <div>安全区域顶部: <span id="safe-area-top"></span></div>
+                <div>安全区域底部: <span id="safe-area-bottom"></span></div>
+                <div>安全区域左侧: <span id="safe-area-left"></span></div>
+                <div>安全区域右侧: <span id="safe-area-right"></span></div>
+            </div>
+        </div>
+
+        <!-- Brand Test Section -->
+        <div class="test-section">
+            <div class="test-title">🎨 FoxAI品牌测试</div>
+            <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 2em; margin: 10px 0;">🦊</div>
+                <div style="background: var(--foxai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5em; font-weight: bold;">FoxAI</div>
+                <div style="margin: 10px 0;">
+                    <span class="feature-tag">品牌色测试</span>
+                    <span class="feature-tag upgrade">渐变效果</span>
+                </div>
+                <button class="touch-button" style="background: var(--foxai-gradient); margin: 10px;">FoxAI按钮</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 更新设备信息
+        function updateDeviceInfo() {
+            document.getElementById('screen-size').textContent = `${screen.width}×${screen.height}`;
+            document.getElementById('viewport-size').textContent = `${window.innerWidth}×${window.innerHeight}`;
+            document.getElementById('device-pixel-ratio').textContent = window.devicePixelRatio || 1;
+            document.getElementById('touch-support').textContent = 'ontouchstart' in window ? 'Yes' : 'No';
+            document.getElementById('orientation').textContent = screen.orientation ? screen.orientation.angle + '°' : 'Unknown';
+            
+            document.getElementById('user-agent').textContent = navigator.userAgent.substring(0, 50) + '...';
+            document.getElementById('platform').textContent = navigator.platform;
+            document.getElementById('language').textContent = navigator.language;
+        }
+
+        // 触摸测试
+        function testTouch(button, size) {
+            const feedback = document.getElementById('touch-feedback');
+            feedback.innerHTML = `✅ ${size} 按钮触摸成功！时间: ${new Date().toLocaleTimeString()}`;
+            button.style.background = 'var(--foxai-gradient-hover)';
+            setTimeout(() => {
+                button.style.background = 'var(--foxai-gradient)';
+            }, 200);
+        }
+
+        // 性能测试
+        function performanceTest() {
+            const results = document.getElementById('performance-results');
+            const startTime = performance.now();
+            
+            // 模拟一些DOM操作
+            for (let i = 0; i < 1000; i++) {
+                const div = document.createElement('div');
+                div.style.transform = `translateX(${i}px)`;
+                document.body.appendChild(div);
+                document.body.removeChild(div);
+            }
+            
+            const endTime = performance.now();
+            const duration = endTime - startTime;
+            
+            results.innerHTML = `
+                <div>DOM操作耗时: ${duration.toFixed(2)}ms</div>
+                <div>内存使用: ${(performance.memory ? (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2) : 'N/A')} MB</div>
+                <div>FPS: ${Math.round(1000 / 16)} (估算)</div>
+            `;
+        }
+
+        // 手势测试
+        function setupGestureTest() {
+            const gestureArea = document.getElementById('gesture-area');
+            const gestureFeedback = document.getElementById('gesture-feedback');
+            let touchCount = 0;
+            let lastTouchTime = 0;
+
+            gestureArea.addEventListener('touchstart', (e) => {
+                touchCount++;
+                const currentTime = Date.now();
+                const timeDiff = currentTime - lastTouchTime;
+                lastTouchTime = currentTime;
+                
+                gestureFeedback.innerHTML = `触摸开始 - 触点数: ${e.touches.length}, 总触摸: ${touchCount}`;
+                
+                if (timeDiff < 300) {
+                    gestureFeedback.innerHTML += ' (双击检测)';
+                }
+            });
+
+            gestureArea.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                gestureFeedback.innerHTML = `滑动中 - 触点数: ${e.touches.length}`;
+            });
+
+            gestureArea.addEventListener('touchend', (e) => {
+                gestureFeedback.innerHTML = `触摸结束 - 剩余触点: ${e.touches.length}`;
+            });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDeviceInfo();
+            setupGestureTest();
+            
+            // 监听屏幕方向变化
+            window.addEventListener('orientationchange', () => {
+                setTimeout(updateDeviceInfo, 100);
+            });
+            
+            // 监听窗口大小变化
+            window.addEventListener('resize', updateDeviceInfo);
+            
+            console.log('📱 FoxAI Mobile Optimization Test 已加载');
+        });
+    </script>
+</body>
+</html>

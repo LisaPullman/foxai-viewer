@@ -9,14 +9,23 @@
     --info-color: #1976d2;
     --success-color: #4caf50;
 
-    /* FoxAI品牌色系 */
+    /* FoxAI品牌色系 - 移动端优化 */
     --foxai-orange: #ff6b35;
     --foxai-orange-light: #ff8a5b;
     --foxai-orange-dark: #e55a2b;
+    --foxai-orange-ultra-light: rgba(255, 107, 53, 0.1);
+    --foxai-orange-soft: rgba(255, 107, 53, 0.2);
     --foxai-gradient: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff8a5b 100%);
     --foxai-gradient-hover: linear-gradient(135deg, #ff8a5b 0%, #ff6b35 50%, #f7931e 100%);
+    --foxai-gradient-vertical: linear-gradient(180deg, #ff6b35 0%, #f7931e 100%);
     --foxai-blue: #4285f4;
     --foxai-blue-light: rgba(66, 133, 244, 0.1);
+
+    /* 移动端专用品牌色 */
+    --foxai-mobile-primary: #ff6b35;
+    --foxai-mobile-secondary: #f7931e;
+    --foxai-mobile-accent: #ff8a5b;
+    --foxai-mobile-bg: rgba(255, 107, 53, 0.05);
 
     /* 背景和表面 - 增强玻璃拟态效果 */
     --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5fbf 100%);
@@ -67,7 +76,7 @@
     --radius-3xl: 24px;
     --radius-full: 50%;
 
-    /* 间距系统 - 8px基准网格 */
+    /* 间距系统 - 移动端优先8px基准网格 */
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;
@@ -79,6 +88,19 @@
     --space-12: 48px;
     --space-16: 64px;
     --space-20: 80px;
+
+    /* 移动端专用间距 */
+    --mobile-space-xs: 6px;   /* 紧凑间距 */
+    --mobile-space-sm: 10px;  /* 小间距 */
+    --mobile-space-md: 14px;  /* 中等间距 */
+    --mobile-space-lg: 18px;  /* 大间距 */
+    --mobile-space-xl: 22px;  /* 超大间距 */
+
+    /* 触摸目标最小尺寸 - Apple HIG & Material Design */
+    --touch-target-min: 44px;        /* 最小触摸目标 */
+    --touch-target-comfortable: 48px; /* 舒适触摸目标 */
+    --touch-target-large: 56px;      /* 大触摸目标 */
+    --touch-target-xl: 64px;         /* 超大触摸目标 */
 
     /* 字体系统 */
     --font-size-xs: 0.75rem;
@@ -197,6 +219,203 @@ body {
     will-change: transform;
 }
 
+/* FoxAI Header - 移动端优化的品牌标识区域 */
+.foxai-header {
+    text-align: center;
+    margin-bottom: var(--mobile-space-lg);
+    position: relative;
+    z-index: 1;
+
+    /* 移动端紧凑布局 */
+    padding: var(--mobile-space-sm) 0;
+}
+
+.foxai-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--mobile-space-md);
+    margin-bottom: var(--mobile-space-xs);
+
+    /* 移动端响应式调整 */
+    flex-wrap: wrap;
+}
+
+.foxai-icon {
+    font-size: var(--font-size-3xl);
+    filter: drop-shadow(0 2px 8px rgba(255, 107, 53, 0.3));
+    animation: foxai-glow 3s ease-in-out infinite alternate;
+
+    /* 移动端触摸友好 */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.foxai-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    /* 移动端居中对齐 */
+    text-align: center;
+}
+
+.foxai-brand {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    background: var(--foxai-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(255, 107, 53, 0.2));
+
+    /* 移动端文字优化 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* FoxAI品牌发光动画 - 移动端优化 */
+@keyframes foxai-glow {
+    0% {
+        filter: drop-shadow(0 2px 8px rgba(255, 107, 53, 0.3));
+    }
+    100% {
+        filter: drop-shadow(0 4px 16px rgba(255, 107, 53, 0.6));
+    }
+}
+
+/* 移动端性能优化动画 */
+@media (max-width: 768px) {
+    /* 减少动画复杂度以提升性能 */
+    .foxai-icon {
+        animation: foxai-glow-mobile 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes foxai-glow-mobile {
+        0% {
+            filter: drop-shadow(0 2px 6px rgba(255, 107, 53, 0.2));
+        }
+        100% {
+            filter: drop-shadow(0 3px 12px rgba(255, 107, 53, 0.4));
+        }
+    }
+
+    /* 优化过渡动画 */
+    * {
+        transition-duration: 0.2s !important;
+    }
+
+    /* 减少模糊效果以提升性能 */
+    .settings, .config-wrapper, .api-pool-info {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+}
+
+/* 高性能设备增强动画 */
+@media (min-width: 769px) and (min-resolution: 2dppx) {
+    .foxai-icon {
+        animation: foxai-glow 3s ease-in-out infinite alternate;
+    }
+}
+
+/* 移动端横屏模式优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+    body {
+        padding: var(--mobile-space-xs);
+    }
+
+    #app {
+        padding: var(--mobile-space-md) var(--mobile-space-lg);
+        min-height: calc(100vh - 2 * var(--mobile-space-xs));
+    }
+
+    .foxai-header {
+        margin-bottom: var(--mobile-space-sm);
+        padding: var(--mobile-space-xs) 0;
+    }
+
+    .foxai-icon {
+        font-size: var(--font-size-2xl);
+    }
+
+    .foxai-brand {
+        font-size: var(--font-size-xl);
+    }
+
+    .settings {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: var(--mobile-space-sm);
+        padding: var(--mobile-space-md);
+        margin-bottom: var(--mobile-space-md);
+    }
+
+    .connection-mode {
+        flex: 1;
+        min-width: 200px;
+        order: 1;
+    }
+
+    .api-pool-info {
+        flex: 2;
+        min-width: 300px;
+        order: 2;
+    }
+
+    .settings-buttons {
+        flex: 0 0 auto;
+        order: 3;
+        width: auto;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+}
+
+/* 超小屏幕设备优化 (iPhone SE等) */
+@media (max-width: 375px) {
+    .foxai-brand {
+        font-size: var(--font-size-lg);
+    }
+
+    .settings {
+        padding: var(--mobile-space-sm);
+        gap: var(--mobile-space-sm);
+    }
+
+    .api-pool-features {
+        gap: var(--mobile-space-xs);
+    }
+
+    .feature-tag {
+        font-size: var(--font-size-xs);
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .settings-buttons {
+        gap: var(--mobile-space-sm);
+    }
+}
+
+/* 大屏手机优化 (iPhone Pro Max等) */
+@media (min-width: 414px) and (max-width: 768px) {
+    .foxai-brand {
+        font-size: var(--font-size-3xl);
+    }
+
+    .settings {
+        padding: var(--mobile-space-xl) var(--mobile-space-lg);
+    }
+
+    .touch-target-comfortable {
+        min-width: var(--touch-target-large);
+        min-height: var(--touch-target-large);
+    }
+}
+
 #app::before {
     content: '';
     position: absolute;
@@ -310,19 +529,42 @@ body {
 }
 
 #send-button, #mic-button {
-    padding: 12px 20px;
+    /* 移动端优先的触摸目标设计 */
+    min-width: var(--touch-target-large);
+    min-height: var(--touch-target-large);
+    padding: var(--mobile-space-md) var(--mobile-space-lg);
+
     border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #4285f4, #1976d2);
-    color: #fff;
+    border-radius: var(--radius-xl);
+    background: var(--foxai-gradient);
+    color: white;
     cursor: pointer;
-    transition: all 0.2s ease;
+
+    /* 移动端优化的过渡效果 */
+    transition: all var(--transition-normal);
     position: relative;
     overflow: hidden;
-    font-weight: 600;
-    font-size: 0.95em;
-    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* 文字样式 */
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
+
+    /* 阴影和边框 */
+    box-shadow:
+        0 4px 15px rgba(255, 107, 53, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+
+    /* 移动端触摸优化 */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+
+    /* 确保按钮可访问性 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
 }
 
 #send-button:hover, #mic-button:hover {
@@ -461,15 +703,30 @@ body {
     vertical-align: top;
 }
 
-/* Connect button specific styles */
+/* Connect button specific styles - 移动端优化 */
 #connect-button {
-    background: linear-gradient(135deg, #4285f4, #1976d2);
-    box-shadow: 0 6px 20px rgba(66, 133, 244, 0.3);
-    /* 确保文本对齐 */
+    /* 移动端触摸目标 */
+    min-width: var(--touch-target-xl);
+    min-height: var(--touch-target-large);
+
+    /* FoxAI品牌色彩 */
+    background: var(--foxai-gradient);
+    box-shadow:
+        0 6px 20px rgba(255, 107, 53, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+
+    /* 文本对齐和样式 */
     line-height: 1.2;
     text-align: center;
-    /* 添加发光效果 */
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+
+    /* 移动端交互优化 */
     position: relative;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
 }
 
 #connect-button::before {
@@ -864,31 +1121,58 @@ body {
     animation: audio-pulse 0.5s infinite;
 }
 
-/* 设置区域 - 统一的玻璃拟态设计 */
+/* 设置区域 - 移动端优先的玻璃拟态设计 */
 .settings {
-    margin-bottom: var(--space-6);
+    /* 移动端布局 */
+    margin-bottom: var(--mobile-space-lg);
     display: flex;
-    gap: var(--space-4);
-    align-items: flex-start;
-    padding: var(--space-6);
-    flex-wrap: wrap;
-    
+    flex-direction: column;
+    gap: var(--mobile-space-md);
+    align-items: stretch;
+    padding: var(--mobile-space-lg) var(--mobile-space-md);
+
     /* 玻璃拟态效果 */
     background: var(--glass-bg);
     backdrop-filter: blur(var(--blur-lg));
     -webkit-backdrop-filter: blur(var(--blur-lg));
     border-radius: var(--radius-2xl);
-    border: 1px solid var(--glass-border);
-    
+    border: 1px solid var(--foxai-orange-soft);
+
     /* 阴影和光效 */
-    box-shadow: 
+    box-shadow:
         var(--shadow-md),
+        0 0 0 1px var(--foxai-orange-ultra-light),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    
+
     /* 过渡动画 */
     transition: all var(--transition-normal);
     position: relative;
     overflow: hidden;
+
+    /* 移动端性能优化 */
+    will-change: transform;
+    transform: translateZ(0);
+
+    /* 减少重绘和重排 */
+    contain: layout style paint;
+
+    /* 优化滚动性能 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* 平板和桌面端设置区域 */
+@media (min-width: 768px) {
+    .settings {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: var(--space-4);
+        padding: var(--space-6);
+        margin-bottom: var(--space-6);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        flex-wrap: wrap;
+    }
 }
 
 .settings::before {
@@ -920,37 +1204,61 @@ body {
 .connection-mode {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    min-width: 200px;
+    gap: var(--mobile-space-sm);
+    width: 100%;
     flex-shrink: 0;
+    order: 1; /* 移动端优先显示 */
 }
 
 .connection-mode label {
     color: var(--text-color);
-    font-weight: 600;
-    font-size: 0.9em;
-    margin-bottom: 4px;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
+    margin-bottom: var(--mobile-space-xs);
+
+    /* 移动端文字优化 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 #connection-mode-select {
-    padding: 12px 16px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    /* 移动端触摸目标优化 */
+    min-height: var(--touch-target-comfortable);
+    padding: var(--mobile-space-md) var(--mobile-space-lg);
+
+    /* 样式设计 */
+    border: 1px solid var(--foxai-orange-soft);
+    border-radius: var(--radius-xl);
+    background: var(--glass-bg-hover);
+    backdrop-filter: blur(var(--blur-md));
+    -webkit-backdrop-filter: blur(var(--blur-md));
+
+    /* 文字样式 */
     color: var(--text-color);
-    font-size: 1em;
+    font-size: 16px; /* 防止iOS自动缩放 */
+    font-weight: var(--font-weight-medium);
+
+    /* 交互优化 */
+    transition: all var(--transition-normal);
     cursor: pointer;
-    transition: all 0.3s ease;
     outline: none;
-    min-height: 44px; /* 触摸友好 */
-    font-weight: 500;
+
+    /* 移动端触摸优化 */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #connection-mode-select:focus {
-    border-color: #4285f4;
-    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
-    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--foxai-orange);
+    box-shadow: 0 0 0 3px var(--foxai-orange-ultra-light);
+    background: var(--surface-color);
+}
+
+#connection-mode-select:hover {
+    border-color: var(--foxai-orange-light);
+    background: var(--glass-bg-active);
 }
 
 /* API Pool Status Display */
@@ -967,11 +1275,13 @@ body {
     border: 1px solid rgba(76, 175, 80, 0.3);
     border-radius: var(--radius-2xl);
 
-    /* 布局 */
+    /* 移动端布局 */
     flex: 1;
-    min-width: 280px;
+    width: 100%;
+    min-width: auto;
     position: relative;
     overflow: hidden;
+    order: 2; /* 移动端中间显示 */
 
     /* 阴影和过渡 */
     box-shadow:
@@ -1028,10 +1338,19 @@ body {
 
 .api-pool-features, .websocket-features {
     display: flex;
-    gap: 8px;
+    gap: var(--mobile-space-sm);
     flex-wrap: wrap;
-    margin-top: 12px;
+    margin-top: var(--mobile-space-md);
     align-items: center;
+    justify-content: flex-start;
+}
+
+/* 平板和桌面端功能标签 */
+@media (min-width: 768px) {
+    .api-pool-features, .websocket-features {
+        gap: var(--space-2);
+        margin-top: var(--space-3);
+    }
 }
 
 .feature-tag {
@@ -1148,12 +1467,35 @@ body {
     font-weight: 400;
 }
 
-/* 设置按钮组 */
+/* 设置按钮组 - 移动端优化 */
 .settings-buttons {
     display: flex;
-    gap: var(--space-3);
+    gap: var(--mobile-space-md);
     align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    order: 3; /* 移动端最后显示 */
+    width: 100%;
+    padding: var(--mobile-space-sm) 0;
+
+    /* 移动端分隔线 */
+    border-top: 1px solid var(--foxai-orange-ultra-light);
+    margin-top: var(--mobile-space-md);
+    padding-top: var(--mobile-space-md);
+}
+
+/* 平板和桌面端设置按钮 */
+@media (min-width: 768px) {
+    .settings-buttons {
+        order: 0;
+        width: auto;
+        justify-content: flex-start;
+        gap: var(--space-3);
+        padding: 0;
+        border-top: none;
+        margin-top: 0;
+        padding-top: 0;
+    }
 }
 
 /* 统一的图标按钮样式 */
@@ -1174,12 +1516,18 @@ body {
     position: relative;
     overflow: hidden;
     
-    /* 触摸优化 */
-    min-width: 48px;
-    min-height: 48px;
+    /* 移动端触摸优化 */
+    min-width: var(--touch-target-comfortable);
+    min-height: var(--touch-target-comfortable);
     display: flex;
     align-items: center;
     justify-content: center;
+
+    /* 移动端交互增强 */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    color: var(--text-color);
 }
 
 .icon-button::before {
@@ -1217,17 +1565,22 @@ body {
 }
 
 #config-toggle.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
+    background: var(--foxai-gradient);
+    border-color: var(--foxai-orange);
     color: white;
     transform: rotate(180deg);
-    box-shadow: var(--shadow-lg);
+    box-shadow:
+        var(--shadow-lg),
+        0 0 20px rgba(255, 107, 53, 0.4);
 }
 
 #config-toggle.active:hover {
-    background: var(--primary-hover);
-    border-color: var(--primary-hover);
+    background: var(--foxai-gradient-hover);
+    border-color: var(--foxai-orange-light);
     transform: rotate(180deg) scale(1.05);
+    box-shadow:
+        var(--shadow-xl),
+        0 0 25px rgba(255, 107, 53, 0.5);
 }
 
 #mcp-tools-btn {
@@ -1240,26 +1593,69 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-/* Responsive styles - 移动端优化 */
-@media (max-width: 768px) {
+/* 移动端优先设计 - Mobile First Approach */
+
+/* 基础移动端样式 (默认适用于所有设备) */
+body {
+    padding: var(--mobile-space-sm);
+    background: var(--foxai-gradient);
+
+    /* iOS Safari 安全区域适配 */
+    padding-top: max(var(--mobile-space-sm), env(safe-area-inset-top));
+    padding-bottom: max(var(--mobile-space-sm), env(safe-area-inset-bottom));
+    padding-left: max(var(--mobile-space-sm), env(safe-area-inset-left));
+    padding-right: max(var(--mobile-space-sm), env(safe-area-inset-right));
+
+    /* 移动端性能和交互优化 */
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+
+    /* 防止移动端意外缩放 */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#app {
+    padding: var(--mobile-space-lg) var(--mobile-space-md);
+    width: 100%;
+    max-width: none;
+    border-radius: var(--radius-2xl);
+    margin: 0;
+    min-height: calc(100vh - 2 * var(--mobile-space-sm));
+
+    /* 移动端性能优化 */
+    will-change: transform;
+    transform: translateZ(0);
+
+    /* 强化FoxAI品牌背景 */
+    background: var(--surface-color);
+    backdrop-filter: blur(var(--blur-xl));
+    -webkit-backdrop-filter: blur(var(--blur-xl));
+    border: 1px solid var(--foxai-orange-soft);
+    box-shadow:
+        var(--shadow-2xl),
+        0 0 0 1px var(--foxai-orange-ultra-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 平板端适配 (768px+) */
+@media (min-width: 768px) {
     body {
-        padding: 8px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        /* 防止iOS Safari底部工具栏遮挡 */
-        padding-bottom: env(safe-area-inset-bottom);
-        /* 优化移动端滚动 */
-        -webkit-overflow-scrolling: touch;
-        overflow-x: hidden;
-        /* 防止双击缩放 */
-        touch-action: manipulation;
+        padding: var(--space-2);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5fbf 100%);
     }
 
     #app {
-        padding: 20px 15px;
-        width: 100%;
-        max-width: none;
-        border-radius: 20px;
-        margin: 0;
+        padding: var(--space-6) var(--space-5);
+        max-width: 800px;
+        margin: 0 auto;
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--shadow-2xl);
+    }
+}
         /* 移动端增强玻璃拟态效果 */
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(25px);

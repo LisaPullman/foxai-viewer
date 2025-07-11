@@ -8,10 +8,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FoxAI Multimodal Live API Client</title>
+
+    <!-- PWA支持 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="background-color" content="#ff6b35">
+
+    <!-- iOS Safari支持 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="FoxAI">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+    <!-- Android Chrome支持 -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="FoxAI">
+
+    <!-- 搜索引擎优化 -->
+    <meta name="description" content="FoxAI多模态实时AI客户端 - 支持文本、语音、视频交互">
+    <meta name="keywords" content="AI, 人工智能, 语音交互, 视频通话, FoxAI">
+    <meta name="author" content="FoxAI Team">
+
+    <!-- 社交媒体分享 -->
+    <meta property="og:title" content="FoxAI Viewer">
+    <meta property="og:description" content="FoxAI多模态实时AI客户端">
+    <meta property="og:image" content="icons/icon-512x512.png">
+    <meta property="og:type" content="website">
+
+    <!-- 样式和字体 -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- 图标 -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
 </head>
 <body>
     <div id="app">
@@ -141,6 +173,91 @@
             <button class="close-button material-symbols-outlined">close</button>
         </div>
     </div>
+
+    <!-- PWA安装提示 -->
+    <div id="pwa-install-prompt" style="display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--foxai-gradient); color: white; padding: 15px; border-radius: 12px; box-shadow: var(--shadow-lg); z-index: 10000;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.2em;">🦊</span>
+            <div style="flex: 1;">
+                <div style="font-weight: bold; margin-bottom: 5px;">安装FoxAI应用</div>
+                <div style="font-size: 0.9em; opacity: 0.9;">获得更好的移动端体验</div>
+            </div>
+            <button id="pwa-install-button" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 8px; font-weight: bold;">安装</button>
+            <button id="pwa-dismiss-button" style="background: transparent; border: none; color: white; padding: 8px; font-size: 1.2em;">×</button>
+        </div>
+    </div>
+
     <script src="js/main.js" type="module"></script>
+
+    <!-- PWA Service Worker 注册 -->
+    <script>
+        // 注册Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker 注册成功:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('❌ Service Worker 注册失败:', error);
+                    });
+            });
+        }
+
+        // PWA安装提示
+        let deferredPrompt;
+        const installPrompt = document.getElementById('pwa-install-prompt');
+        const installButton = document.getElementById('pwa-install-button');
+        const dismissButton = document.getElementById('pwa-dismiss-button');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // 阻止默认的安装提示
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // 显示自定义安装提示
+            if (!localStorage.getItem('pwa-dismissed')) {
+                installPrompt.style.display = 'block';
+            }
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`PWA安装结果: ${outcome}`);
+                deferredPrompt = null;
+                installPrompt.style.display = 'none';
+            }
+        });
+
+        dismissButton.addEventListener('click', () => {
+            installPrompt.style.display = 'none';
+            localStorage.setItem('pwa-dismissed', 'true');
+        });
+
+        // 检测PWA安装状态
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ FoxAI PWA 安装成功');
+            installPrompt.style.display = 'none';
+        });
+
+        // 移动端优化：防止双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // 移动端优化：防止长按选择
+        document.addEventListener('selectstart', function(e) {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>
